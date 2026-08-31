@@ -90,16 +90,29 @@ export function ViveciRedesign() {
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const whatsappVisible = prefersReducedMotion || showWhatsApp;
+
+  useEffect(() => {
+    if (window.innerWidth <= 800 || window.location.hash) return;
+    const previousRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+    const frame = requestAnimationFrame(() => window.scrollTo(0, 0));
+    return () => {
+      cancelAnimationFrame(frame);
+      window.history.scrollRestoration = previousRestoration;
+    };
+  }, []);
+
   const introProgress = usePinnedProgress(intro);
   const projectsScrollProgress = usePinnedProgress(projectsSection);
-  const logoDraw = useTransform(introProgress, [0, .48], [0, 1]);
-  const introHintOpacity = useTransform(introProgress, [0, .025, .085], [1, .95, 0]);
-  const introHintY = useTransform(introProgress, [0, .085], [0, 16]);
+  const logoDraw = useTransform(introProgress, [.012, .5], [0, 1]);
+  const introMarkOpacity = useTransform(introProgress, [0, .01, .03], [0, 0, 1]);
+  const introHintOpacity = useTransform(introProgress, [0, .006, .03], [1, .96, 0]);
+  const introHintY = useTransform(introProgress, [0, .03], [0, 18]);
   const introMarkScale = useTransform(introProgress, [.45, .78], [1, .2]);
   const introMarkY = useTransform(introProgress, [.45, .78], [0, -330]);
   const heroOpacity = useTransform(introProgress, [.5, .75], [0, 1]);
   const heroY = useTransform(introProgress, [.5, .78], [60, 0]);
-  const imageY = useTransform(introProgress, [.5, 1], [48, -36]);
+  const imageY = useTransform(introProgress, [.5, 1], [58, -46]);
   const smoothImageY = useSpring(imageY, { stiffness: 76, damping: 24 });
   const projectX = useTransform(projectsScrollProgress, [0, 1], [0, -projectDragLimit]);
   const projectProgress = useTransform(projectsScrollProgress, [0, 1], [.16, 1]);
@@ -136,7 +149,7 @@ export function ViveciRedesign() {
   return <main className={styles.site}>
     <section ref={intro} className={styles.intro} id="inicio">
       <div className={styles.introSticky}>
-        <motion.div className={styles.introMark} style={{ scale: introMarkScale, y: introMarkY }}>
+        <motion.div className={styles.introMark} style={{ opacity: introMarkOpacity, scale: introMarkScale, y: introMarkY }}>
           <VVCLogo progress={logoDraw} />
           <motion.span style={{ opacity: logoDraw }}>VIVECI / DIGITAL STUDIO</motion.span>
         </motion.div>
