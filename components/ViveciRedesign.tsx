@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { ContactForm } from "./ContactForm";
 import { VVCLogo } from "./VVCLogo";
@@ -15,13 +15,25 @@ const process = [
   ["Publicação", "Ajustes finais, domínio conectado e seu negócio pronto para ser encontrado."],
 ] as const;
 
-const services = [
-  ["Site institucional", "Seu negócio apresentado com clareza, confiança e uma ação simples para o cliente."],
-  ["Cardápio digital", "Categorias, fotos e preços com o pedido chegando direto no seu WhatsApp."],
-  ["Agendamento online", "O cliente escolhe serviço, dia e horário sem esperar uma resposta."],
-  ["Catálogo de produtos", "Uma vitrine própria com filtros, informações e pedido direto."],
-  ["Landing page", "Uma página objetiva para orçamento, campanha ou captação de contatos."],
-  ["Presença no Google", "Estrutura preparada para a busca local entender e encontrar o seu negócio."],
+const serviceObjectives = [
+  {
+    title: "Presença",
+    purpose: "Para sua empresa ser encontrada, transmitir confiança e apresentar seus serviços com clareza profissional.",
+    services: ["Site institucional", "Presença no Google", "Integração com WhatsApp"],
+    glyph: "P",
+  },
+  {
+    title: "Captação",
+    purpose: "Para transformar visitantes em oportunidades reais e tornar o próximo contato simples, direto e mensurável.",
+    services: ["Landing pages", "Formulários de contato", "WhatsApp", "Estrutura de conversão", "Analytics e mensuração"],
+    glyph: "C",
+  },
+  {
+    title: "Operação",
+    purpose: "Para o site também executar funções do negócio e reduzir tarefas que hoje dependem de atendimento manual.",
+    services: ["Agendamento online", "Cardápio digital", "Catálogo de produtos", "Reservas", "Automações e integrações"],
+    glyph: "O",
+  },
 ] as const;
 
 const projects = [
@@ -57,12 +69,27 @@ function usePinnedProgress(ref: RefObject<HTMLElement | null>) {
   return progress;
 }
 
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(query.matches);
+    const frame = requestAnimationFrame(update);
+    query.addEventListener("change", update);
+    return () => { cancelAnimationFrame(frame); query.removeEventListener("change", update); };
+  }, []);
+  return reduced;
+}
+
 export function ViveciRedesign() {
   const intro = useRef<HTMLElement>(null);
   const projectsSection = useRef<HTMLElement>(null);
   const projectsViewport = useRef<HTMLDivElement>(null);
   const projectsTrack = useRef<HTMLDivElement>(null);
   const [projectDragLimit, setProjectDragLimit] = useState(0);
+  const [showWhatsApp, setShowWhatsApp] = useState(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const whatsappVisible = prefersReducedMotion || showWhatsApp;
   const introProgress = usePinnedProgress(intro);
   const projectsScrollProgress = usePinnedProgress(projectsSection);
   const logoDraw = useTransform(introProgress, [0, .48], [0, 1]);
@@ -72,10 +99,15 @@ export function ViveciRedesign() {
   const introMarkY = useTransform(introProgress, [.45, .78], [0, -330]);
   const heroOpacity = useTransform(introProgress, [.5, .75], [0, 1]);
   const heroY = useTransform(introProgress, [.5, .78], [60, 0]);
-  const imageY = useTransform(introProgress, [.5, 1], [30, -20]);
-  const smoothImageY = useSpring(imageY, { stiffness: 80, damping: 25 });
+  const imageY = useTransform(introProgress, [.5, 1], [48, -36]);
+  const smoothImageY = useSpring(imageY, { stiffness: 76, damping: 24 });
   const projectX = useTransform(projectsScrollProgress, [0, 1], [0, -projectDragLimit]);
   const projectProgress = useTransform(projectsScrollProgress, [0, 1], [.16, 1]);
+
+  useMotionValueEvent(introProgress, "change", (latest) => {
+    const shouldShow = latest >= .82;
+    setShowWhatsApp((current) => current === shouldShow ? current : shouldShow);
+  });
 
   useEffect(() => {
     const measure = () => {
@@ -119,13 +151,13 @@ export function ViveciRedesign() {
             <nav aria-label="Navegação principal"><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a href="#sobre">Sobre</a><a className={styles.headerCta} href="#contato">Quero meu modelo ↗</a></nav>
           </header>
           <motion.div className={styles.heroPhoto} style={{ y: smoothImageY }}>
-            <Image src="/images/viveci-monumental-hq.png" fill preload quality={95} sizes="100vw" alt="Arquitetura monumental de inspiração romana, em travertino" />
+            <Image src="/images/viveci-monumental-hq.png" fill preload quality={100} sizes="100vw" alt="Arquitetura monumental de inspiração romana, em travertino" />
           </motion.div>
           <div className={styles.heroShade}/>
           <div className={styles.heroCopy}>
             <p className={styles.kicker}>VVC / SITES PARA NEGÓCIOS LOCAIS</p>
             <h1>Vim, vi, e fiz<br/>o seu <em>site.</em></h1>
-            <p className={styles.heroSub}>Eu chego, entendo como o seu negócio funciona e construo um site único, feito.</p>
+            <p className={styles.heroSub}><strong>Sites feitos para transformar visitas em clientes.</strong><span>Criamos a presença digital do seu negócio para gerar confiança, aparecer no Google e facilitar a chegada de novos clientes.</span></p>
             <a className={styles.primaryButton} href="#contato">Quero ver meu modelo <span>→</span></a>
           </div>
           <div className={styles.heroPromise}>
@@ -144,8 +176,12 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.services} id="servicos">
-      <div className={styles.sectionIntro}><span>Serviços</span><h2>O site certo para o momento do seu negócio.</h2><a href="#contato">Quero o meu →</a></div>
-      <div className={styles.serviceGrid}>{services.map(([title,text],i)=><article key={title}><div className={styles.serviceIcon}>{["⌂","▤","◫","▦","□","◎"][i]}</div><h3>{title}</h3><p>{text}</p></article>)}</div>
+      <div className={styles.sectionIntro}><span>Objetivos</span><h2>Um site pensado para o resultado que o seu negócio precisa.</h2><p>A tecnologia muda de acordo com o objetivo. O site continua sendo o centro de tudo.</p><a href="#contato">Quero ver meu modelo →</a></div>
+      <div className={styles.serviceGrid}>{serviceObjectives.map((objective)=><article className={styles.serviceObjective} key={objective.title}>
+        <div className={styles.serviceHeading}><div className={styles.serviceGlyph} aria-hidden>{objective.glyph}</div><h3>{objective.title}</h3></div>
+        <p className={styles.servicePurpose}>{objective.purpose}</p>
+        <ul aria-label={`Soluções para ${objective.title}`}>{objective.services.map((service)=><li key={service}>{service}</li>)}</ul>
+      </article>)}</div>
     </section>
 
     <section ref={projectsSection} className={styles.projects} id="projetos">
@@ -162,7 +198,7 @@ export function ViveciRedesign() {
                   <span><i/><i/><i/></span><b/><em/>
                 </div>
                 <motion.div className={styles.projectImage} variants={{ rest: { scale: 1 }, hover: { scale: 1.025 } }} transition={{ duration: .85, ease: [.22, 1, .36, 1] }}>
-                  <Image src={project.image} fill quality={100} sizes="(max-width: 800px) 88vw, 72vw" alt={`Página inicial do projeto ${project.area}`} style={{ objectPosition: project.position }} draggable={false}/>
+                  <Image src={project.image} fill quality={100} sizes="(max-width: 800px) 88vw, (max-width: 1600px) 72vw, 1120px" alt={`Página inicial do projeto ${project.area}`} style={{ objectPosition: project.position }} draggable={false}/>
                 </motion.div>
               </div>
             </motion.article>)}
@@ -185,8 +221,8 @@ export function ViveciRedesign() {
     <section className={styles.tech}>
       <div className={styles.techCopy}><span>Tecnologia</span><h2>Design que funciona.<br/>Tecnologia que sustenta.</h2><p>Cada tela é construída para abrir rápido, orientar o visitante e funcionar bem na situação real: no celular, na rua e sem tempo para adivinhar.</p><ul><li>Celular primeiro</li><li>Performance e velocidade</li><li>SEO local</li><li>Acessibilidade</li><li>Movimento com propósito</li></ul><a href="#contato">Ver isso no meu negócio →</a></div>
       <div className={styles.deviceStage}>
-        <div className={styles.desktopMock}><div className={styles.mockBar}><i/><i/><i/><span>modelo.viveci.studio</span></div><div className={styles.mockPage}><div><small>MODELO DEMONSTRATIVO</small><h3>MADEIRA COM<br/>DESIGN. ESPAÇOS<br/>COM PROPÓSITO.</h3><button>CONHEÇA O PROJETO</button></div><Image src="/images/vvc-architecture-hq.png" fill quality={95} sizes="45vw" alt="Interior contemporâneo usado em um modelo demonstrativo" /></div></div>
-        <div className={styles.phoneMock}><div className={styles.phoneNotch}/><small>VIVECI</small><h3>MADEIRA<br/>COM DESIGN.</h3><Image src="/images/vvc-architecture-hq.png" fill quality={95} sizes="180px" alt="Detalhe do modelo demonstrativo no celular" /></div>
+        <div className={styles.desktopMock}><div className={styles.mockBar}><i/><i/><i/><span>modelo.viveci.studio</span></div><div className={styles.mockPage}><div><small>MODELO DEMONSTRATIVO</small><h3>MADEIRA COM<br/>DESIGN. ESPAÇOS<br/>COM PROPÓSITO.</h3><button>CONHEÇA O PROJETO</button></div><Image src="/images/vvc-architecture-hq.png" fill quality={100} sizes="(max-width: 800px) 94vw, 47vw" alt="Interior contemporâneo usado em um modelo demonstrativo" /></div></div>
+        <div className={styles.phoneMock}><div className={styles.phoneNotch}/><small>VIVECI</small><h3>MADEIRA<br/>COM DESIGN.</h3><Image src="/images/vvc-architecture-hq.png" fill quality={100} sizes="(max-width: 800px) 27vw, 14vw" alt="Detalhe do modelo demonstrativo no celular" /></div>
       </div>
     </section>
 
@@ -196,14 +232,29 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.story} id="sobre">
-      <div className={styles.storyImage}><Image src="/images/viveci-monumental-hq.png" fill quality={95} sizes="45vw" alt="Detalhe da arquitetura monumental que inspira a identidade da Viveci" /></div>
-      <div className={styles.storyCopy}><span>A origem</span><h2>Veni.<br/>Vidi.<br/><em>Vici.</em></h2><p>Viveci nasce desses três verbos. Não como uma promessa de conquista, mas como método: primeiro eu chego ao seu negócio, depois entendo como ele funciona e só então construo.</p><p>Meu nome é Enzo. Na Viveci, você fala diretamente com quem desenha e escreve o código. O site é feito para o seu negócio e continua sendo seu.</p><a href="#contato">Falar comigo →</a></div>
+      <div className={styles.storyImage}><Image src="/images/viveci-monumental-hq.png" fill quality={100} sizes="(max-width: 800px) 100vw, 48vw" alt="Detalhe da arquitetura monumental que inspira a identidade da Viveci" /></div>
+      <div className={styles.storyCopy}><span>A origem</span><h2 className={styles.originWords}><span>Veni</span><span>Vidi</span><em>Vici</em></h2><p>Viveci nasce desses três verbos. Não como uma promessa de conquista, mas como método: primeiro eu chego ao seu negócio, depois entendo como ele funciona e só então construo.</p><p>Meu nome é Enzo. Na Viveci, você fala diretamente com quem desenha e escreve o código. O site é feito para o seu negócio e continua sendo seu.</p><a href="#contato">Falar comigo →</a></div>
     </section>
 
     <section className={styles.faq} id="duvidas"><div><span>Dúvidas</span><h2>Antes de você perguntar.</h2></div><div>{[["O modelo é grátis mesmo?","Sim. Você não paga para ver, não assina nada e pode recusar sem compromisso."],["Eu já tenho Instagram. Preciso de site?","O Instagram ajuda quem já conhece você. O site também encontra quem está procurando seu serviço no Google."],["Quanto custa?","O valor depende do que o site precisa ter. Eu só fecho o número depois que você vê o modelo e define o escopo."],["Quem fica com o site e o domínio?","O endereço e o conteúdo ficam no nome do seu negócio. O site é seu."]].map(([q,a])=><details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</div></section>
 
-    <section className={styles.contact} id="contato"><div className={styles.contactTitle}><span>Vamos ver como fica?</span><h2>Seu próximo site começa com um modelo.</h2><p>Sem custo. Sem compromisso. Você só precisa me contar sobre o negócio.</p></div><ContactForm/></section>
+    <section className={styles.contact} id="contato"><div className={styles.contactTitle}><span>Vamos ver como fica?</span><h2>Seu próximo site começa com um modelo.</h2><p>São só quatro informações. O restante da conversa acontece diretamente pelo WhatsApp.</p></div><ContactForm/></section>
 
-    <footer className={styles.footer}><div className={styles.footerArch}><Image src="/images/viveci-monumental-hq.png" fill quality={95} sizes="35vw" alt="" /></div><div className={styles.footerCta}><h2>Vamos construir<br/>o seu próximo site?</h2><a href="#contato">Quero ver meu modelo →</a></div><div className={styles.footerGrid}><div><b>VIVECI</b><span>/ DIGITAL STUDIO</span><p>Sites para negócios que atendem gente todo dia.</p></div><div><span>NAVEGAÇÃO</span><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a href="#sobre">Sobre</a><a href="#duvidas">Dúvidas</a></div><div><span>CONTATO</span><a href="#contato">Falar comigo</a><p>Atendimento direto com quem faz.</p></div><div className={styles.footerLogo}><VVCLogo/></div></div><div className={styles.copyright}><span>© 2026 VIVECI DIGITAL STUDIO</span><a href="#inicio">VOLTAR AO TOPO ↑</a></div></footer>
+    <motion.a
+      className={styles.floatingWhatsapp}
+      href="/api/whatsapp?source=floating"
+      aria-label="Falar com a Viveci pelo WhatsApp"
+      aria-hidden={!whatsappVisible}
+      tabIndex={whatsappVisible ? 0 : -1}
+      initial={false}
+      animate={whatsappVisible ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 14, scale: .94 }}
+      transition={{ duration: prefersReducedMotion ? 0 : .45, ease: [.22, 1, .36, 1] }}
+      style={{ pointerEvents: whatsappVisible ? "auto" : "none", visibility: whatsappVisible ? "visible" : "hidden" }}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden><path d="M20.5 11.7a8.4 8.4 0 0 1-12.4 7.4L3.5 20.5l1.4-4.4a8.4 8.4 0 1 1 15.6-4.4Z"/><path d="M8.2 7.4c.2-.4.4-.4.7-.4h.5c.2 0 .3 0 .5.5l.7 1.7c.1.3.1.4 0 .6l-.6.8c-.2.2-.1.4 0 .6.7 1.3 1.7 2.3 3 3 .3.1.5.1.7-.1l.8-1c.2-.2.4-.2.6-.1l1.8.8c.3.1.4.3.4.5 0 .3-.2 1.5-1.1 2.1-.7.5-1.6.7-2.6.4-1.2-.3-2.8-1-4.5-2.5-1.3-1.2-2.3-2.6-2.7-3.8-.5-1.4 0-2.5.4-2.9.4-.4.8-.5 1.4-.2Z"/></svg>
+      <span>Falar com a Viveci</span>
+    </motion.a>
+
+    <footer className={styles.footer}><div className={styles.footerArch}><Image src="/images/viveci-monumental-hq.png" fill quality={100} sizes="(max-width: 800px) 60vw, 35vw" alt="" /></div><div className={styles.footerCta}><h2>Vamos construir<br/>o seu próximo site?</h2><a href="#contato">Quero ver meu modelo →</a></div><div className={styles.footerGrid}><div><b>VIVECI</b><span>/ DIGITAL STUDIO</span><p>Sites para negócios que atendem gente todo dia.</p></div><div><span>NAVEGAÇÃO</span><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a href="#sobre">Sobre</a><a href="#duvidas">Dúvidas</a></div><div><span>CONTATO</span><a href="#contato">Falar comigo</a><p>Atendimento direto com quem faz.</p></div><div className={styles.footerLogo}><VVCLogo/></div></div><div className={styles.copyright}><span>© 2026 VIVECI DIGITAL STUDIO</span><a href="#inicio">VOLTAR AO TOPO ↑</a></div></footer>
   </main>;
 }

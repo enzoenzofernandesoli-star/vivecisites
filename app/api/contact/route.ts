@@ -5,17 +5,14 @@ const schema = z.object({
   name: z.string().trim().min(2).max(80),
   whatsapp: z.string().trim().min(8).max(24).regex(/^[+\d\s()-]+$/),
   business: z.string().trim().min(2).max(120),
-  segment: z.string().trim().min(2).max(80),
-  city: z.string().trim().max(100).optional().default(""),
-  links: z.string().trim().max(500).optional().default(""),
-  need: z.string().trim().max(120).optional().default(""),
-  problem: z.string().trim().max(1200).optional().default(""),
-  timing: z.string().trim().max(80).optional().default(""),
+  links: z.string().trim().max(240).optional().default(""),
   website: z.string().max(0).optional().default("")
 });
 
 const attempts = new Map<string, { count: number; reset: number }>();
 export async function POST(request: NextRequest) {
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > 5_000) return NextResponse.json({ error: "Solicitação muito grande." }, { status: 413 });
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const now = Date.now();
   const rate = attempts.get(ip);
@@ -25,7 +22,18 @@ export async function POST(request: NextRequest) {
     const result = schema.safeParse(await request.json());
     if (!result.success) return NextResponse.json({ error: "Revise os campos e tente novamente." }, { status: 400 });
     if (result.data.website) return NextResponse.json({ ok: true });
-    // Production hook: persist or send result.data through a trusted provider using server-only env vars.
-    return NextResponse.json({ ok: true, message: "Recebi. Vou olhar o seu negócio e te chamar no WhatsApp para montar o modelo." }, { status: 201 });
+    const businessNumber = process.env.VIVECI_WHATSAPP_NUMBER?.replace(/\D/g, "");
+    if (!businessNumber || !/^55\d{10,11}$/.test(businessNumber)) {
+      return NextResponse.json({ error: "O WhatsApp da Viveci ainda não foi configurado. Tente novamente em instantes." }, { status: 503 });
+    }
+    const message = [
+      "Olá! Quero ver uma proposta/modelo de site para minha empresa.",
+      "",
+      `Nome: ${result.data.name}`,
+      `Empresa: ${result.data.business}`,
+      `Instagram/Site: ${result.data.links || "Não informado"}`,
+    ].join("\n");
+    const whatsappUrl = `https://wa.me/${businessNumber}?text=${encodeURIComponent(message)}`;
+    return NextResponse.json({ ok: true, whatsappUrl }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch { return NextResponse.json({ error: "Não foi possível processar a solicitação." }, { status: 400 }); }
 }
