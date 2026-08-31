@@ -66,6 +66,8 @@ export function ViveciRedesign() {
   const introProgress = usePinnedProgress(intro);
   const projectsScrollProgress = usePinnedProgress(projectsSection);
   const logoDraw = useTransform(introProgress, [0, .48], [0, 1]);
+  const introHintOpacity = useTransform(introProgress, [0, .025, .085], [1, .95, 0]);
+  const introHintY = useTransform(introProgress, [0, .085], [0, 16]);
   const introMarkScale = useTransform(introProgress, [.45, .78], [1, .2]);
   const introMarkY = useTransform(introProgress, [.45, .78], [0, -330]);
   const heroOpacity = useTransform(introProgress, [.5, .75], [0, 1]);
@@ -106,6 +108,10 @@ export function ViveciRedesign() {
           <VVCLogo progress={logoDraw} />
           <motion.span style={{ opacity: logoDraw }}>VIVECI / DIGITAL STUDIO</motion.span>
         </motion.div>
+        <motion.div className={styles.introScrollHint} style={{ opacity: introHintOpacity, y: introHintY }} aria-hidden>
+          <span>ARRASTE PARA BAIXO</span>
+          <i><b/></i>
+        </motion.div>
 
         <motion.div className={styles.hero} style={{ opacity: heroOpacity, y: heroY }}>
           <header className={styles.header}>
@@ -129,7 +135,6 @@ export function ViveciRedesign() {
           </div>
           <div className={styles.heroMonogram} aria-hidden>VVC</div>
           <div className={styles.heroSide}><i/><span>Estratégia</span><span>Design</span><span>Tecnologia</span><span>Resultado</span></div>
-          <div className={styles.scrollLabel}>SCROLL PARA CONSTRUIR <span>↓</span></div>
         </motion.div>
       </div>
     </section>
