@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { getViveciWhatsAppNumber } from "@/lib/viveci-contact";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(80),
@@ -22,10 +23,7 @@ export async function POST(request: NextRequest) {
     const result = schema.safeParse(await request.json());
     if (!result.success) return NextResponse.json({ error: "Revise os campos e tente novamente." }, { status: 400 });
     if (result.data.website) return NextResponse.json({ ok: true });
-    const businessNumber = process.env.VIVECI_WHATSAPP_NUMBER?.replace(/\D/g, "");
-    if (!businessNumber || !/^55\d{10,11}$/.test(businessNumber)) {
-      return NextResponse.json({ error: "O WhatsApp da Viveci ainda não foi configurado. Tente novamente em instantes." }, { status: 503 });
-    }
+    const businessNumber = getViveciWhatsAppNumber();
     const message = [
       "Olá! Quero ver uma proposta/modelo de site para minha empresa.",
       "",
