@@ -1,0 +1,20 @@
+"use client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+const formSchema = z.object({ name:z.string().min(2,"Como posso chamar você?"), whatsapp:z.string().min(8,"Digite um WhatsApp válido.").max(24), business:z.string().min(2,"Qual é o nome do negócio?"), segment:z.string().min(2,"Escolha o tipo de negócio."), city:z.string().optional(), links:z.string().optional(), need:z.string().optional(), problem:z.string().optional(), timing:z.string().optional(), website:z.string().max(0).optional() });
+type FormData = z.infer<typeof formSchema>;
+export function ContactForm(){
+  const [status,setStatus]=useState(""); const {register,handleSubmit,reset,formState:{errors,isSubmitting}}=useForm<FormData>({resolver:zodResolver(formSchema),defaultValues:{segment:"",need:"",timing:"",website:""}});
+  const submit=async(data:FormData)=>{setStatus("");try{const r=await fetch("/api/contact",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});const json=await r.json();if(!r.ok)throw new Error(json.error);setStatus(json.message||"Briefing recebido.");reset();}catch(e){setStatus(e instanceof Error?e.message:"Tente novamente.");}};
+  return <form onSubmit={handleSubmit(submit)} className="contact-form" noValidate><div className="form-intro"><h3>ME CONTA DO SEU NEGÓCIO</h3><p>Leva um minuto. Com isso eu já consigo começar o seu modelo.</p></div>
+    <div className="form-grid"><label>Seu nome *<input {...register("name")} autoComplete="name" />{errors.name&&<small>{errors.name.message}</small>}</label><label>WhatsApp *<input {...register("whatsapp")} type="tel" inputMode="tel" autoComplete="tel" placeholder="É por aqui que eu mando o modelo"/>{errors.whatsapp&&<small>{errors.whatsapp.message}</small>}</label></div>
+    <div className="form-grid"><label>Nome do negócio *<input {...register("business")} autoComplete="organization" />{errors.business&&<small>{errors.business.message}</small>}</label><label>O que vocês fazem? *<select {...register("segment")}><option value="">Selecione</option><option>Restaurante ou delivery</option><option>Barbearia, salão ou estética</option><option>Clínica ou consultório</option><option>Academia ou estúdio</option><option>Loja ou catálogo</option><option>Oficina ou auto center</option><option>Pet shop</option><option>Eventos e fotografia</option><option>Prestação de serviços</option><option>Outro</option></select>{errors.segment&&<small>{errors.segment.message}</small>}</label></div>
+    <div className="form-grid"><label>Cidade<input {...register("city")} autoComplete="address-level2" /></label><label>Instagram, Google ou site atual<input {...register("links")} type="url" placeholder="Me ajuda a entender a cara do negócio"/></label></div>
+    <div className="form-grid"><label>O que o site precisa ter?<select {...register("need")}><option value="">Ainda não sei</option><option>Cardápio e pedido no WhatsApp</option><option>Agendamento online</option><option>Catálogo de produtos</option><option>Formulário de orçamento</option><option>Só apresentar o negócio</option></select></label><label>Para quando?<select {...register("timing")}><option value="">Selecione</option><option>Assim que der</option><option>Nas próximas semanas</option><option>Só pesquisando por enquanto</option></select></label></div>
+    <label>O que mais te dá trabalho hoje?<textarea {...register("problem")} rows={3} placeholder="Ex.: responder preço no direct, perder horário, depender do aplicativo"/></label><label className="honey" aria-hidden="true">Website<input {...register("website")} tabIndex={-1}/></label>
+    <div className="form-submit"><button className="button button-light" disabled={isSubmitting}>{isSubmitting?"ENVIANDO...":"ENVIAR E RECEBER MEU MODELO ↗"}</button><p role="status" aria-live="polite">{status||"Sem custo e sem compromisso. Seu contato será usado apenas para este atendimento."}</p></div>
+  </form>;
+}
