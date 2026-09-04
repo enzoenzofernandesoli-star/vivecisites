@@ -164,7 +164,7 @@ export function ViveciRedesign() {
             <nav aria-label="Navegação principal"><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a href="#sobre">Sobre</a><a className={styles.headerCta} href="#contato">Quero meu modelo ↗</a></nav>
           </header>
           <motion.div className={styles.heroPhoto} style={{ y: smoothImageY }}>
-            <Image src="/images/vvc-midnight-hero-extracted.png" fill preload quality={100} sizes="100vw" alt="Escultura clássica diante de uma arquitetura monumental em tons de azul-marinho" />
+            <Image src="/images/vvc-midnight-hero-4k.png" fill preload quality={100} sizes="100vw" alt="Escultura clássica diante de uma arquitetura monumental em tons de azul-marinho" />
           </motion.div>
           <div className={styles.heroShade}/>
           <div className={styles.heroCopy}>
