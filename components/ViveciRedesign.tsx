@@ -10,15 +10,15 @@ import styles from "./viveci.module.css";
 const process = [
   ["Conversa", "Você me conta sobre o negócio, o público e o que hoje dá trabalho."],
   ["Modelo", "Eu organizo as informações e construo uma primeira versão com a sua identidade."],
-  ["Você olha", "Recebe o link, navega pelo celular e decide com o site na sua frente."],
-  ["Valor", "Com o que precisa estar no projeto definido, eu passo um valor fechado."],
-  ["Publicação", "Ajustes finais, domínio conectado e seu negócio pronto para ser encontrado."],
+  ["Você avalia", "Você recebe o link, navega pelo celular e decide com o site na sua frente."],
+  ["Valor", "Com tudo o que o projeto precisa já definido, eu apresento um valor fechado."],
+  ["Publicação", "Faço os ajustes finais, conecto o domínio e deixo seu negócio pronto para ser encontrado."],
 ] as const;
 
 const serviceObjectives = [
   {
     title: "Presença",
-    purpose: "Para sua empresa ser encontrada, transmitir confiança e apresentar seus serviços com clareza profissional.",
+    purpose: "Para que sua empresa seja encontrada, transmita confiança e apresente seus serviços com clareza profissional.",
     services: ["Site institucional", "Presença no Google", "Integração com WhatsApp"],
     glyph: "P",
   },
@@ -164,13 +164,13 @@ export function ViveciRedesign() {
             <nav aria-label="Navegação principal"><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a href="#sobre">Sobre</a><a className={styles.headerCta} href="#contato">Quero meu modelo ↗</a></nav>
           </header>
           <motion.div className={styles.heroPhoto} style={{ y: smoothImageY }}>
-            <Image src="/images/viveci-monumental-hq.png" fill preload quality={100} sizes="100vw" alt="Arquitetura monumental de inspiração romana, em travertino" />
+            <Image src="/images/vvc-midnight-hero-extracted.png" fill preload quality={100} sizes="100vw" alt="Escultura clássica diante de uma arquitetura monumental em tons de azul-marinho" />
           </motion.div>
           <div className={styles.heroShade}/>
           <div className={styles.heroCopy}>
             <p className={styles.kicker}>VVC / SITES PARA NEGÓCIOS LOCAIS</p>
-            <h1>Vim, vi, e fiz<br/>o seu <em>site.</em></h1>
-            <p className={styles.heroSub}><strong>Sites feitos para transformar visitas em clientes.</strong><span>Criamos a presença digital do seu negócio para gerar confiança, aparecer no Google e facilitar a chegada de novos clientes.</span></p>
+            <h1>Vim, vi e fiz<br/>o seu <em>site.</em></h1>
+            <p className={styles.heroSub}><strong>Sites feitos para transformar visitas em clientes.</strong><span>Criamos a presença digital do seu negócio para que ele transmita confiança, apareça no Google e facilite a chegada de novos clientes.</span></p>
             <a className={styles.primaryButton} href="#contato">Quero ver meu modelo <span>→</span></a>
           </div>
           <div className={styles.heroPromise}>
@@ -232,7 +232,7 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.tech}>
-      <div className={styles.techCopy}><span>Tecnologia</span><h2>Design que funciona.<br/>Tecnologia que sustenta.</h2><p>Cada tela é construída para abrir rápido, orientar o visitante e funcionar bem na situação real: no celular, na rua e sem tempo para adivinhar.</p><ul><li>Celular primeiro</li><li>Performance e velocidade</li><li>SEO local</li><li>Acessibilidade</li><li>Movimento com propósito</li></ul><a href="#contato">Ver isso no meu negócio →</a></div>
+      <div className={styles.techCopy}><span>Tecnologia</span><h2>Design que funciona.<br/>Tecnologia que sustenta tudo.</h2><p>Cada tela é construída para carregar rapidamente, orientar o visitante e funcionar em situações reais: no celular, na rua ou quando não há tempo para adivinhar.</p><ul><li>Celular primeiro</li><li>Performance e velocidade</li><li>SEO local</li><li>Acessibilidade</li><li>Movimento com propósito</li></ul><a href="#contato">Ver isso no meu negócio →</a></div>
       <div className={styles.deviceStage}>
         <div className={styles.desktopMock}><div className={styles.mockBar}><i/><i/><i/><span>modelo.viveci.studio</span></div><div className={styles.mockPage}><div><small>MODELO DEMONSTRATIVO</small><h3>MADEIRA COM<br/>DESIGN. ESPAÇOS<br/>COM PROPÓSITO.</h3><button>CONHEÇA O PROJETO</button></div><Image src="/images/vvc-architecture-hq.png" fill quality={100} sizes="(max-width: 800px) 94vw, 47vw" alt="Interior contemporâneo usado em um modelo demonstrativo" /></div></div>
         <div className={styles.phoneMock}><div className={styles.phoneNotch}/><small>VIVECI</small><h3>MADEIRA<br/>COM DESIGN.</h3><Image src="/images/vvc-architecture-hq.png" fill quality={100} sizes="(max-width: 800px) 27vw, 14vw" alt="Detalhe do modelo demonstrativo no celular" /></div>
@@ -240,16 +240,16 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.offer}>
-      <div><span>O modelo vem primeiro</span><h2>Eu monto.<br/>Você olha.<br/><em>Depois decide.</em></h2></div>
+      <div><span>O modelo vem primeiro</span><h2>Eu monto.<br/>Você avalia.<br/><em>Depois decide.</em></h2></div>
       <div><p>Nenhum negócio deveria pagar por um site que ainda não viu. Eu preparo uma versão com a sua marca e as suas informações para você navegar antes de conversarmos sobre valor.</p><a className={styles.darkButton} href="#contato">Quero ver meu modelo →</a></div>
     </section>
 
     <section className={styles.story} id="sobre">
       <div className={styles.storyImage}><Image src="/images/viveci-monumental-hq.png" fill quality={100} sizes="(max-width: 800px) 100vw, 48vw" alt="Detalhe da arquitetura monumental que inspira a identidade da Viveci" /></div>
-      <div className={styles.storyCopy}><span>A origem</span><h2 className={styles.originWords}><span>Veni</span><span>Vidi</span><em>Vici</em></h2><p>Viveci nasce desses três verbos. Não como uma promessa de conquista, mas como método: primeiro eu chego ao seu negócio, depois entendo como ele funciona e só então construo.</p><p>Meu nome é Enzo. Na Viveci, você fala diretamente com quem desenha e escreve o código. O site é feito para o seu negócio e continua sendo seu.</p><a href="#contato">Falar comigo →</a></div>
+      <div className={styles.storyCopy}><span>A origem</span><h2 className={styles.originWords}><span>Veni</span><span>Vidi</span><em>Vici</em></h2><p>A Viveci nasce desses três verbos. Não como uma promessa de conquista, mas como método: primeiro eu chego ao seu negócio, depois entendo como ele funciona e só então construo.</p><p>Meu nome é Enzo. Na Viveci, você fala diretamente com quem desenha e escreve o código. O site é feito para o seu negócio e pertence a você.</p><a href="#contato">Falar comigo →</a></div>
     </section>
 
-    <section className={styles.faq} id="duvidas"><div><span>Dúvidas</span><h2>Antes de você perguntar.</h2></div><div>{[["O modelo é grátis mesmo?","Sim. Você não paga para ver, não assina nada e pode recusar sem compromisso."],["Eu já tenho Instagram. Preciso de site?","O Instagram ajuda quem já conhece você. O site também encontra quem está procurando seu serviço no Google."],["Quanto custa?","O valor depende do que o site precisa ter. Eu só fecho o número depois que você vê o modelo e define o escopo."],["Quem fica com o site e o domínio?","O endereço e o conteúdo ficam no nome do seu negócio. O site é seu."]].map(([q,a])=><details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</div></section>
+    <section className={styles.faq} id="duvidas"><div><span>Dúvidas</span><h2>Antes de você perguntar.</h2></div><div>{[["O modelo é grátis mesmo?","Sim. Você não paga para ver, não assina nada e pode recusar sem compromisso."],["Eu já tenho Instagram. Preciso de site?","O Instagram ajuda a manter contato com quem já conhece o seu negócio. O site também permite que sua empresa seja encontrada por quem procura seu serviço no Google."],["Quanto custa?","O valor depende do que o site precisa ter. Eu só defino o valor depois que você vê o modelo e aprova o escopo."],["Quem fica com o site e o domínio?","O domínio e o conteúdo pertencem ao seu negócio. O site é seu."]].map(([q,a])=><details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</div></section>
 
     <section className={styles.contact} id="contato"><div className={styles.contactTitle}><span>Vamos ver como fica?</span><h2>Seu próximo site começa com um modelo.</h2><p>São só quatro informações. O restante da conversa acontece diretamente pelo WhatsApp.</p></div><ContactForm/></section>
 

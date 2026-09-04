@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (result.data.website) return NextResponse.json({ ok: true });
     const businessNumber = getViveciWhatsAppNumber();
     const message = [
-      "Olá! Quero ver uma proposta/modelo de site para minha empresa.",
+      "Olá! Quero ver um modelo de site para minha empresa.",
       "",
       `Nome: ${result.data.name}`,
       `Empresa: ${result.data.business}`,
