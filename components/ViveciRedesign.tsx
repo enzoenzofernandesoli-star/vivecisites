@@ -501,7 +501,7 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.services} id="servicos">
-      <div className={styles.servicesIntro}><span>Nossos serviços</span><h2>O que a Viveci faz.</h2><p>Quatro frentes. Uma presença digital completa.</p></div>
+      <Reveal className={styles.servicesIntro}><span>Nossos serviços</span><h2>O que a Viveci faz.</h2><p>Quatro frentes. Uma presença digital completa.</p></Reveal>
       <div className={styles.serviceGrid}>{serviceObjectives.map((objective, index)=><Reveal as="article" index={index} className={styles.serviceObjective} key={objective.title}>
         <div className={styles.serviceIcon}><ServiceIcon type={objective.icon}/></div>
         <h3>{objective.title}</h3>
@@ -513,9 +513,9 @@ export function ViveciRedesign() {
 
     <section ref={projectsSection} className={styles.projects} id="projetos">
       <div className={styles.projectsSticky}>
-        <div className={styles.projectsHead}>
+        <Reveal className={styles.projectsHead}>
           <span>Projetos</span><h2>Experiências feitas para impressionar.</h2><p>Explore o que podemos criar para o seu negócio.</p>
-        </div>
+        </Reveal>
         <div ref={projectsViewport} className={styles.projectsViewport} role="region" aria-label={isMobile ? "Galeria de projetos — arraste para o lado" : "Galeria horizontal de projetos controlada pelo scroll"}>
           <motion.div ref={projectsTrack} className={styles.projectsTrack} style={{ x: isMobile ? 0 : projectX }}>
             {projects.map((project, index) => <motion.article
@@ -555,11 +555,11 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.processSection} id="processo">
-      <div className={styles.processHeading}>
+      <Reveal className={styles.processHeading}>
         <span>Como funciona</span>
         <h2>Um processo claro. Sem surpresas.</h2>
         <p>Você acompanha cada etapa, do primeiro contato ao site publicado.</p>
-      </div>
+      </Reveal>
 
       {/*
         Fluxo em ziguezague: cada etapa entra quando alcança a tela e um raio
@@ -581,10 +581,10 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.technology} id="tecnologia">
-      <div className={styles.technologyHeading}>
+      <Reveal className={styles.technologyHeading}>
         <div><span>Tecnologia</span><h2>Uma base sólida.<br/>Infinitas possibilidades.</h2></div>
         <p>Cada produto combina interface, lógica e dados em uma experiência integrada.</p>
-      </div>
+      </Reveal>
       <span className={styles.stackLabel}>Stack ilustrativa · a validar</span>
       <div className={styles.technologyStack}>
         {technologyLayers.map((layer, index) => <Reveal as="article" index={index} className={styles.technologyLayer} key={layer.title}>
@@ -601,7 +601,7 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.faqSection} id="duvidas">
-      <div className={styles.faqHeading}><span>Perguntas frequentes</span><h2>Tudo claro para começar.</h2><p>As respostas que você precisa, sem complicação.</p></div>
+      <Reveal className={styles.faqHeading}><span>Perguntas frequentes</span><h2>Tudo claro para começar.</h2><p>As respostas que você precisa, sem complicação.</p></Reveal>
       <div className={styles.faqList}>
         {frequentlyAskedQuestions.map(([question, answer], index) => {
           const isOpen = activeFaq === index;
@@ -622,11 +622,11 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.contact} id="contato">
-      <div className={styles.contactIntro}>
+      <Reveal className={styles.contactIntro}>
         <span>Vamos ver como fica?</span>
         <h2>Seu próximo site <br/>começa com <br/>um modelo.</h2>
         <p>Veja uma primeira ideia com a identidade da sua empresa. Depois, você decide.</p>
-      </div>
+      </Reveal>
       <div className={styles.contactRobot} aria-hidden>
         <i />
         <Image src="/images/vvc-android-hero.png" fill quality={100} sizes="(max-width: 800px) 90vw, 42vw" alt="" />
