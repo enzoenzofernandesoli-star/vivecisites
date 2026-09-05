@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Michroma } from "next/font/google";
+import { SmoothScrollProvider } from "@/providers/SmoothScrollProvider";
+import { ScrollTriggerProbe } from "@/providers/ScrollTriggerProbe";
 import "./globals.css";
 
 // Fonte de display das seções (--font-sans em globals.css).
@@ -42,5 +44,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: "#020D1B", colorScheme: "dark light", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="pt-BR"><body className={`${bricolage.variable} ${instrument.variable} ${michroma.variable}`}>{children}</body></html>;
+  return <html lang="pt-BR"><body className={`${bricolage.variable} ${instrument.variable} ${michroma.variable}`}>
+      <SmoothScrollProvider>{children}</SmoothScrollProvider>
+      <ScrollTriggerProbe />
+    </body></html>;
 }

@@ -554,7 +554,7 @@ export function ViveciRedesign() {
       </div>
     </section>
 
-    <section className={styles.processSection} id="processo">
+    <section className={styles.processSection} id="processo" data-probe-target>
       <Reveal className={styles.processHeading}>
         <span>Como funciona</span>
         <h2>Um processo claro. Sem surpresas.</h2>
