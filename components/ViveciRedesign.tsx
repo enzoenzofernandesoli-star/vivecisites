@@ -1,54 +1,149 @@
 "use client";
 
 import Image from "next/image";
-import { AnimatePresence, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useInView, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { ContactForm } from "./ContactForm";
-import { VVCLogo } from "./VVCLogo";
+import { LOGO_DRAW_DURATION, VVCLogo } from "./VVCLogo";
 import styles from "./viveci.module.css";
 
 const process = [
   {
     title: "Conversa",
-    summary: "Entendemos seu negócio.",
-    headline: <>Primeiro,<br/>a gente conversa.</>,
-    description: "Você me conta sobre o negócio, o público e o que precisa funcionar melhor.",
-    tags: ["Seu negócio", "Seu público", "Seu objetivo"],
-    image: "/images/projects/prospector.png",
+    description: "Você conta sobre seu negócio, seu público e o que precisa.",
+    icon: "chat",
   },
   {
     title: "Modelo",
-    summary: "Criamos a primeira versão.",
-    headline: <>Primeiro,<br/>você vê.</>,
-    description: "Criamos um modelo com a identidade da sua empresa para você explorar antes de decidir.",
-    tags: ["Sua marca", "Seu conteúdo", "Sua experiência"],
-    image: "/images/projects/pousada-da-nivea.png",
+    description: "Criamos uma primeira versão com a identidade da sua empresa.",
+    icon: "window",
   },
   {
     title: "Você avalia",
-    summary: "Você explora e dá feedback.",
-    headline: <>Você explora.<br/>Eu ajusto.</>,
-    description: "Você navega pelo modelo no computador e no celular e aponta o que deseja ajustar.",
-    tags: ["Navegação", "Conteúdo", "Ajustes"],
-    image: "/images/projects/barbearia-buenos-aires.png",
+    description: "Você recebe o link, explora o site e compartilha seus ajustes.",
+    icon: "search",
   },
   {
     title: "Valor",
-    summary: "Apresentamos o valor fechado.",
-    headline: <>Tudo claro.<br/>Valor fechado.</>,
-    description: "Com o projeto definido e aprovado, você recebe uma proposta objetiva, sem surpresas.",
-    tags: ["Escopo", "Prazo", "Investimento"],
-    image: "/images/projects/arsenal-de-prompts.png",
+    description: "Com o escopo definido, apresentamos um valor fechado.",
+    icon: "price",
   },
   {
     title: "Publicação",
-    summary: "Ajustamos e colocamos no ar.",
-    headline: <>Seu site,<br/>no ar.</>,
-    description: "Faço os ajustes finais, conecto o domínio e publico tudo com segurança.",
-    tags: ["Domínio", "SEO", "Publicação"],
-    image: "/images/projects/maria-flor.png",
+    description: "Fazemos os ajustes finais, conectamos o domínio e publicamos.",
+    icon: "globe",
   },
 ] as const;
+
+/** Ícones de linha das etapas do processo. */
+function ProcessIcon({ name }: { name: (typeof process)[number]["icon"] }) {
+  return (
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden focusable="false">
+      {name === "chat" && <>
+        <path d="M5 10a3 3 0 0 1 3-3h16a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H14l-6 4v-4a3 3 0 0 1-3-3z"/>
+        <circle cx="12" cy="14" r=".9" fill="currentColor" stroke="none"/>
+        <circle cx="16" cy="14" r=".9" fill="currentColor" stroke="none"/>
+        <circle cx="20" cy="14" r=".9" fill="currentColor" stroke="none"/>
+      </>}
+      {name === "window" && <>
+        <rect x="4" y="6" width="24" height="20" rx="2.5"/>
+        <line x1="4" y1="12" x2="28" y2="12"/>
+        <circle cx="7.6" cy="9" r=".8" fill="currentColor" stroke="none"/>
+        <circle cx="10.4" cy="9" r=".8" fill="currentColor" stroke="none"/>
+        <rect x="8" y="16" width="7" height="6" rx="1"/>
+        <line x1="18" y1="17.5" x2="24" y2="17.5"/>
+        <line x1="18" y1="21" x2="24" y2="21"/>
+      </>}
+      {name === "search" && <>
+        <circle cx="14.5" cy="14.5" r="8"/>
+        <line x1="20.4" y1="20.4" x2="27" y2="27"/>
+      </>}
+      {name === "price" && <>
+        <path d="M8 4h11l5 5v19a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+        <polyline points="19,4 19,9 24,9"/>
+        <line x1="15" y1="14" x2="15" y2="25"/>
+        <path d="M18 16.4c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 1.7 3 2.1 3 .9 3 2.1-1.3 2-3 2-3-.8-3-2"/>
+      </>}
+      {name === "globe" && <>
+        <circle cx="16" cy="16" r="11"/>
+        <ellipse cx="16" cy="16" rx="4.6" ry="11"/>
+        <line x1="5" y1="16" x2="27" y2="16"/>
+        <path d="M7.5 9.5c2.4 1.6 5.4 2.5 8.5 2.5s6.1-.9 8.5-2.5"/>
+        <path d="M7.5 22.5c2.4-1.6 5.4-2.5 8.5-2.5s6.1.9 8.5 2.5"/>
+      </>}
+    </svg>
+  );
+}
+
+/**
+ * Entrada padrão das seções: o elemento sobe e aparece quando alcança a tela.
+ * Substitui a tag original (não embrulha), para não quebrar grids.
+ * O `index` escalona a entrada de um grupo em 55ms por item.
+ */
+function Reveal({
+  as: Tag = "div",
+  index = 0,
+  className = "",
+  children,
+  ...rest
+}: {
+  as?: "div" | "article" | "li" | "section";
+  index?: number;
+  className?: string;
+  children: React.ReactNode;
+} & React.HTMLAttributes<HTMLElement>) {
+  const ref = useRef<HTMLElement>(null);
+  const inView = useInView(ref, { once: true, amount: .25 });
+  const reduced = usePrefersReducedMotion();
+  return (
+    <Tag
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ref={ref as any}
+      className={`${styles.reveal} ${className}`.trim()}
+      data-shown={reduced || inView ? "true" : "false"}
+      style={{ ["--i" as string]: index }}
+      {...rest}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+/**
+ * Uma etapa do fluxo em ziguezague. Quando entra na tela, o raio diagonal se
+ * desenha e o card sobe logo atrás. A revelação é feita por transição de CSS
+ * sobre `data-shown` — mais previsível que animar `clip-path` pelo framer.
+ */
+function ProcessFlowStep({
+  step,
+  index,
+  alwaysVisible,
+}: {
+  step: (typeof process)[number];
+  index: number;
+  alwaysVisible: boolean;
+}) {
+  const ref = useRef<HTMLLIElement>(null);
+  const inView = useInView(ref, { once: true, amount: .4 });
+  const side = index % 2 === 0 ? "left" : "right";
+
+  return (
+    <li
+      ref={ref}
+      className={styles.processFlowItem}
+      data-side={side}
+      data-shown={alwaysVisible || inView ? "true" : "false"}
+    >
+      {index > 0 && <span className={styles.processBolt} aria-hidden />}
+      <div className={styles.processFlowCard}>
+        <span className={styles.processCardIcon}><ProcessIcon name={step.icon} /></span>
+        <h3>{step.title}</h3>
+        <em aria-hidden />
+        <p>{step.description}</p>
+      </div>
+    </li>
+  );
+}
 
 const serviceObjectives = [
   {
@@ -119,6 +214,8 @@ function ServiceIcon({ type }: { type: (typeof serviceObjectives)[number]["icon"
 }
 
 const projects = [
+  { area: "Viveci App", image: "/images/projects/viveci-app.jpg", position: "top center", kind: "Aplicativo de treinos · Área logada" },
+  { area: "Agenda Viveci", image: "/images/projects/agenda-viveci.jpg", position: "top center", kind: "CRM e agenda · Sistema interno" },
   { area: "Prospector", image: "/images/projects/prospector.png", position: "top center" },
   { area: "Pousada da Nívea", image: "/images/projects/pousada-da-nivea.png", position: "top center" },
   { area: "Care For Men", image: "/images/projects/care-for-men.png", position: "top center" },
@@ -163,6 +260,19 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
+/** No celular a galeria de projetos vira scroll horizontal nativo com snap. */
+function useIsMobile() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 800px)");
+    const update = () => setMobile(query.matches);
+    const frame = requestAnimationFrame(update);
+    query.addEventListener("change", update);
+    return () => { cancelAnimationFrame(frame); query.removeEventListener("change", update); };
+  }, []);
+  return mobile;
+}
+
 export function ViveciRedesign() {
   const intro = useRef<HTMLElement>(null);
   const projectsSection = useRef<HTMLElement>(null);
@@ -170,10 +280,11 @@ export function ViveciRedesign() {
   const projectsTrack = useRef<HTMLDivElement>(null);
   const [projectDragLimit, setProjectDragLimit] = useState(0);
   const [activeProject, setActiveProject] = useState(0);
-  const [activeProcess, setActiveProcess] = useState(1);
+  const [activeProcess, setActiveProcess] = useState(0);
   const [activeFaq, setActiveFaq] = useState<number | null>(2);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const isMobile = useIsMobile();
   const whatsappVisible = prefersReducedMotion || showWhatsApp;
 
   useEffect(() => {
@@ -189,28 +300,117 @@ export function ViveciRedesign() {
 
   const introProgress = usePinnedProgress(intro);
   const projectsScrollProgress = usePinnedProgress(projectsSection);
-  const logoDraw = useTransform(introProgress, [.012, .5], [0, 1]);
-  const introMarkOpacity = useTransform(introProgress, [0, .01, .03, .58, .76], [0, 0, 1, 1, 0]);
-  const introHintOpacity = useTransform(introProgress, [0, .006, .03], [1, .96, 0]);
-  const introHintY = useTransform(introProgress, [0, .03], [0, 18]);
-  const introMarkScale = useTransform(introProgress, [.45, .78], [1, .2]);
-  const introMarkY = useTransform(introProgress, [.45, .78], [0, -330]);
-  const heroOpacity = useTransform(introProgress, [.5, .75], [0, 1]);
-  const heroY = useTransform(introProgress, [.5, .78], [60, 0]);
-  const imageY = useTransform(introProgress, [.5, 1], [58, -46]);
+  // Parallax da foto do herói enquanto a primeira tela sai de cena.
+  const imageY = useTransform(introProgress, [0, 1], [0, -46]);
   const smoothImageY = useSpring(imageY, { stiffness: 76, damping: 24 });
-  const projectX = useTransform(projectsScrollProgress, [0, 1], [0, -projectDragLimit]);
-  const projectProgress = useTransform(projectsScrollProgress, [0, 1], [.16, 1]);
+  /**
+   * Desktop: o trilho anda de projeto em projeto. O scroll escolhe o card e a
+   * mola leva o trilho até a posição exata dele — assim nunca para no meio de
+   * dois projetos, e o card ativo fica sempre centralizado.
+   */
+  const projectXTarget = useMotionValue(0);
+  const projectX = useSpring(projectXTarget, { stiffness: 130, damping: 24, mass: .55 });
+  const projectProgressTarget = useMotionValue(.16);
+  const projectProgress = useSpring(projectProgressTarget, { stiffness: 130, damping: 24, mass: .55 });
 
-  useMotionValueEvent(introProgress, "change", (latest) => {
-    const shouldShow = latest >= .82;
-    setShowWhatsApp((current) => current === shouldShow ? current : shouldShow);
-  });
+  /**
+   * Abertura: a logo se desenha sozinha e entrega o herói. Não depende de
+   * scroll — com movimento reduzido a marca é pulada por completo.
+   */
+  const [introPhase, setIntroPhase] = useState<"draw" | "exit" | "done">(
+    () => "draw"
+  );
+  const introVisible = introPhase !== "done";
 
+  useEffect(() => {
+    if (prefersReducedMotion) { setIntroPhase("done"); return; }
+    // A abertura sempre começa do topo, mesmo se o navegador restaurar o scroll.
+    if (!window.location.hash) window.scrollTo(0, 0);
+    const hold = (LOGO_DRAW_DURATION + .34) * 1000;
+    const exit = 620;
+    const toExit = setTimeout(() => setIntroPhase("exit"), hold);
+    const toDone = setTimeout(() => setIntroPhase("done"), hold + exit);
+    // Quem já quiser começar a navegar pula a abertura.
+    const skip = () => { setIntroPhase("done"); };
+    window.addEventListener("wheel", skip, { passive: true, once: true });
+    window.addEventListener("touchmove", skip, { passive: true, once: true });
+    window.addEventListener("keydown", skip, { once: true });
+    return () => {
+      clearTimeout(toExit);
+      clearTimeout(toDone);
+      window.removeEventListener("wheel", skip);
+      window.removeEventListener("touchmove", skip);
+      window.removeEventListener("keydown", skip);
+    };
+  }, [prefersReducedMotion]);
+
+  // A página fica travada só durante a abertura.
+  useEffect(() => {
+    if (!introVisible || prefersReducedMotion) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previous; };
+  }, [introVisible, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (introPhase === "done") setShowWhatsApp(true);
+  }, [introPhase]);
+
+  /** Deslocamento que deixa cada card centralizado no viewport. */
+  const centeredOffset = (index: number) => {
+    const viewport = projectsViewport.current;
+    const track = projectsTrack.current;
+    const card = track?.children[index] as HTMLElement | undefined;
+    if (!viewport || !card) return 0;
+    return card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
+  };
+
+  // No desktop o projeto ativo vem do progresso do scroll travado.
+  // No celular quem manda é a posição do carrossel nativo (efeito abaixo).
   useMotionValueEvent(projectsScrollProgress, "change", (latest) => {
-    const nextProject = Math.round(latest * (projects.length - 1));
+    if (isMobile) return;
+    const last = projects.length - 1;
+    const nextProject = Math.max(0, Math.min(last, Math.round(latest * last)));
     setActiveProject((current) => current === nextProject ? current : nextProject);
+    projectXTarget.set(-centeredOffset(nextProject));
+    projectProgressTarget.set(.16 + (1 - .16) * (last ? nextProject / last : 1));
   });
+
+  /**
+   * Índice do card mais próximo do centro do carrossel.
+   * Lido do DOM, não do estado: as setas precisam funcionar em toques
+   * seguidos, antes do evento de scroll atualizar o React.
+   */
+  const nearestProject = () => {
+    const viewport = projectsViewport.current;
+    const track = projectsTrack.current;
+    if (!viewport || !track) return activeProject;
+    const cards = Array.from(track.children) as HTMLElement[];
+    if (!cards.length) return activeProject;
+    const center = viewport.scrollLeft + viewport.clientWidth / 2;
+    let best = 0;
+    let bestDistance = Infinity;
+    cards.forEach((card, index) => {
+      const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+      if (distance < bestDistance) { bestDistance = distance; best = index; }
+    });
+    return best;
+  };
+
+  // Celular: o projeto ativo acompanha a posição do carrossel.
+  useEffect(() => {
+    if (!isMobile) return;
+    const viewport = projectsViewport.current;
+    if (!viewport) return;
+    const onScroll = () => {
+      const best = nearestProject();
+      setActiveProject((current) => current === best ? current : best);
+    };
+    viewport.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => viewport.removeEventListener("scroll", onScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
 
   useEffect(() => {
     const measure = () => {
@@ -219,15 +419,30 @@ export function ViveciRedesign() {
       if (!viewport || !track) return;
       const limit = Math.max(0, track.scrollWidth - viewport.clientWidth);
       setProjectDragLimit(limit);
+      // Recentraliza o card ativo quando a largura muda.
+      if (!isMobile) projectXTarget.set(-centeredOffset(activeProject));
     };
     measure();
     const observer = new ResizeObserver(measure);
     if (projectsViewport.current) observer.observe(projectsViewport.current);
     if (projectsTrack.current) observer.observe(projectsTrack.current);
     return () => observer.disconnect();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile, activeProject]);
 
   const goToProject = (index: number) => {
+    // Celular: centraliza o card no carrossel — o scroll-snap trava nele.
+    if (isMobile) {
+      const viewport = projectsViewport.current;
+      const track = projectsTrack.current;
+      const card = track?.children[index] as HTMLElement | undefined;
+      if (!viewport || !card) return;
+      viewport.scrollTo({
+        left: card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2,
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+      });
+      return;
+    }
     const section = projectsSection.current;
     if (!section) return;
     const distance = Math.max(1, section.offsetHeight - window.innerHeight);
@@ -235,21 +450,37 @@ export function ViveciRedesign() {
     window.scrollTo({ top: section.offsetTop + target * distance, behavior: "smooth" });
   };
 
-  const moveProjects = (direction: -1 | 1) => goToProject(Math.max(0, Math.min(projects.length - 1, activeProject + direction)));
+  const moveProjects = (direction: -1 | 1) => {
+    const from = isMobile ? nearestProject() : activeProject;
+    goToProject(Math.max(0, Math.min(projects.length - 1, from + direction)));
+  };
 
   return <main className={styles.site}>
     <section ref={intro} className={styles.intro} id="inicio">
       <div className={styles.introSticky}>
-        <motion.div className={styles.introMark} style={{ opacity: introMarkOpacity, scale: introMarkScale, y: introMarkY }}>
-          <VVCLogo progress={logoDraw} />
-          <motion.span style={{ opacity: logoDraw }}>VIVECI / DIGITAL STUDIO</motion.span>
-        </motion.div>
-        <motion.div className={styles.introScrollHint} style={{ opacity: introHintOpacity, y: introHintY }} aria-hidden>
-          <span>ARRASTE PARA BAIXO</span>
-          <i><b/></i>
-        </motion.div>
+        <AnimatePresence>
+          {introVisible && (
+            <motion.div
+              className={styles.introMark}
+              key="intro-mark"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: .94, transition: { duration: .55, ease: [.22, 1, .36, 1] } }}
+            >
+              <VVCLogo animated />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <motion.div className={styles.hero} style={{ opacity: heroOpacity, y: heroY }}>
+        <motion.div
+          className={styles.hero}
+          initial={false}
+          animate={{
+            opacity: introPhase === "draw" ? 0 : 1,
+            y: introPhase === "draw" ? 34 : 0,
+          }}
+          transition={{ duration: prefersReducedMotion ? 0 : .7, ease: [.22, 1, .36, 1] }}
+        >
           <header className={styles.header}>
             <a className={styles.brand} href="#inicio" aria-label="Viveci — início"><VVCLogo/><i/><b>VIVECI</b></a>
             <nav aria-label="Navegação principal"><a href="#inicio">Início</a><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a className={styles.headerCta} href="#contato" aria-label="Iniciar projeto"><span>Iniciar projeto</span><b>→</b></a></nav>
@@ -271,12 +502,12 @@ export function ViveciRedesign() {
 
     <section className={styles.services} id="servicos">
       <div className={styles.servicesIntro}><span>Nossos serviços</span><h2>O que a Viveci faz.</h2><p>Quatro frentes. Uma presença digital completa.</p></div>
-      <div className={styles.serviceGrid}>{serviceObjectives.map((objective)=><article className={styles.serviceObjective} key={objective.title}>
+      <div className={styles.serviceGrid}>{serviceObjectives.map((objective, index)=><Reveal as="article" index={index} className={styles.serviceObjective} key={objective.title}>
         <div className={styles.serviceIcon}><ServiceIcon type={objective.icon}/></div>
         <h3>{objective.title}</h3>
         <p className={styles.servicePurpose}>{objective.purpose}</p>
         <a className={styles.serviceLink} href="#contato">Saiba mais <span>↗</span></a>
-      </article>)}</div>
+      </Reveal>)}</div>
       <div className={styles.servicesFooter}><p>Da ideia à evolução do seu negócio.</p><a href="#contato">Vamos conversar</a></div>
     </section>
 
@@ -285,33 +516,33 @@ export function ViveciRedesign() {
         <div className={styles.projectsHead}>
           <span>Projetos</span><h2>Experiências feitas para impressionar.</h2><p>Explore o que podemos criar para o seu negócio.</p>
         </div>
-        <div ref={projectsViewport} className={styles.projectsViewport} role="region" aria-label="Galeria horizontal de projetos controlada pelo scroll">
-          <motion.div ref={projectsTrack} className={styles.projectsTrack} style={{ x: projectX }}>
+        <div ref={projectsViewport} className={styles.projectsViewport} role="region" aria-label={isMobile ? "Galeria de projetos — arraste para o lado" : "Galeria horizontal de projetos controlada pelo scroll"}>
+          <motion.div ref={projectsTrack} className={styles.projectsTrack} style={{ x: isMobile ? 0 : projectX }}>
             {projects.map((project, index) => <motion.article
               className={styles.projectCard}
               data-active={activeProject === index}
               key={project.area}
               initial={false}
-              animate={{
+              animate={isMobile ? { scale: 1, opacity: 1, y: 0, rotateY: 0 } : {
                 scale: activeProject === index ? 1 : .77,
                 opacity: activeProject === index ? 1 : .48,
                 y: activeProject === index ? 0 : 25,
                 rotateY: activeProject === index ? 0 : index < activeProject ? 8 : -8,
               }}
-              transition={{ duration: .58, ease: [.22, 1, .36, 1] }}
+              transition={{ duration: .34, ease: [.22, 1, .36, 1] }}
             >
               <div className={styles.projectShell}>
-                <motion.div className={styles.projectImage} animate={{ scale: activeProject === index ? 1.015 : 1 }} transition={{ duration: .7, ease: [.22, 1, .36, 1] }}>
-                  <Image src={project.image} fill quality={100} sizes="(max-width: 800px) 88vw, (max-width: 1600px) 72vw, 1120px" alt={`Página inicial do projeto ${project.area}`} style={{ objectPosition: project.position }} draggable={false}/>
-                </motion.div>
+                <div className={styles.projectImage}>
+                  <Image src={project.image} fill quality={100} sizes="(max-width: 800px) 84vw, (max-width: 1600px) 72vw, 1120px" alt={`Página inicial do projeto ${project.area}`} style={{ objectPosition: project.position }} draggable={false}/>
+                </div>
               </div>
             </motion.article>)}
           </motion.div>
         </div>
-        <motion.div className={styles.projectMeta} key={projects[activeProject].area} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .38, ease: [.22, 1, .36, 1] }}>
+        <motion.div className={styles.projectMeta} key={projects[activeProject].area} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .26, ease: [.22, 1, .36, 1] }}>
           <span>PROJETO SELECIONADO / {String(activeProject + 1).padStart(2, "0")}</span>
           <h3>{projects[activeProject].area}</h3>
-          <p>Site institucional · Experiência responsiva</p>
+          <p>{"kind" in projects[activeProject] ? (projects[activeProject] as { kind: string }).kind : "Site institucional · Experiência responsiva"}</p>
           <a href="#contato">Explorar conceito <i>↗</i></a>
         </motion.div>
         <div className={styles.projectsControls}>
@@ -325,58 +556,28 @@ export function ViveciRedesign() {
 
     <section className={styles.processSection} id="processo">
       <div className={styles.processHeading}>
-        <span>Do primeiro contato à publicação</span>
-        <h2>Seu site, passo a passo.</h2>
-        <p>Clareza em cada etapa. Você participa de todas elas.</p>
+        <span>Como funciona</span>
+        <h2>Um processo claro. Sem surpresas.</h2>
+        <p>Você acompanha cada etapa, do primeiro contato ao site publicado.</p>
       </div>
 
-      <div className={styles.processStage} aria-live="polite">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            className={styles.processStageInner}
-            key={activeProcess}
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -12 }}
-            transition={{ duration: prefersReducedMotion ? 0 : .42, ease: [.22, 1, .36, 1] }}
-          >
-            <div className={styles.processCopy}>
-              <span>ETAPA <b>{String(activeProcess + 1).padStart(2, "0")}</b> / 05</span>
-              <h3>{process[activeProcess].headline}</h3>
-              <p>{process[activeProcess].description}</p>
-              <div className={styles.processTags}>{process[activeProcess].tags.map((tag) => <i key={tag}>{tag}</i>)}</div>
-              <a href="#contato">Quero ver meu modelo <b>↗</b></a>
-            </div>
+      {/*
+        Fluxo em ziguezague: cada etapa entra quando alcança a tela e um raio
+        diagonal desenha o caminho até a próxima, alternando os lados.
+      */}
+      <ol className={styles.processFlow}>
+        {process.map((step, index) => (
+          <ProcessFlowStep
+            key={step.title}
+            step={step}
+            index={index}
+            alwaysVisible={prefersReducedMotion}
+          />
+        ))}
+      </ol>
 
-            <div className={styles.processPreview}>
-              <motion.div className={styles.processDesktop} initial={prefersReducedMotion ? false : { scale: .975 }} animate={{ scale: 1 }} transition={{ duration: .55, ease: [.22, 1, .36, 1] }}>
-                <Image src={process[activeProcess].image} fill quality={100} sizes="(max-width: 800px) 86vw, 54vw" alt={`Visual da etapa ${process[activeProcess].title}`} />
-              </motion.div>
-              <motion.div className={styles.processPhone} initial={prefersReducedMotion ? false : { x: 18, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: .55, delay: .08, ease: [.22, 1, .36, 1] }}>
-                <i aria-hidden />
-                <Image src={process[activeProcess].image} fill quality={100} sizes="(max-width: 800px) 24vw, 13vw" alt="" />
-              </motion.div>
-              <small>MODELO ILUSTRATIVO</small>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className={styles.processSteps} role="tablist" aria-label="Etapas do processo de criação">
-        {process.map((step, index) => <button
-          type="button"
-          role="tab"
-          aria-selected={activeProcess === index}
-          className={activeProcess === index ? styles.processStepActive : ""}
-          onClick={() => setActiveProcess(index)}
-          key={step.title}
-        >
-          <b>{String(index + 1).padStart(2, "0")}</b>
-          <strong>{step.title}</strong>
-          <span>{step.summary}</span>
-        </button>)}
-      </div>
       <p className={styles.processClosing}>Veja primeiro. Decida depois.</p>
+      <a className={styles.processCta} href="#contato">Quero ver meu modelo <b>↗</b></a>
     </section>
 
     <section className={styles.technology} id="tecnologia">
@@ -386,11 +587,11 @@ export function ViveciRedesign() {
       </div>
       <span className={styles.stackLabel}>Stack ilustrativa · a validar</span>
       <div className={styles.technologyStack}>
-        {technologyLayers.map((layer, index) => <article className={styles.technologyLayer} key={layer.title}>
+        {technologyLayers.map((layer, index) => <Reveal as="article" index={index} className={styles.technologyLayer} key={layer.title}>
           <b className={styles.layerNumber}>{String(index + 1).padStart(2, "0")}</b>
           <div className={styles.layerCopy}><h3>{layer.title}</h3><i/><p>{layer.description}</p></div>
           <div className={styles.technologyItems}>{layer.technologies.map((technology) => <div className={styles.technologyItem} key={technology}><TechIcon name={technology}/><span>{technology}</span></div>)}</div>
-        </article>)}
+        </Reveal>)}
       </div>
       <div className={styles.technologyDeploy}>
         <span>Versionamento e publicação</span>
@@ -404,14 +605,14 @@ export function ViveciRedesign() {
       <div className={styles.faqList}>
         {frequentlyAskedQuestions.map(([question, answer], index) => {
           const isOpen = activeFaq === index;
-          return <article className={isOpen ? styles.faqOpen : ""} key={question}>
+          return <Reveal as="article" index={index} className={isOpen ? styles.faqOpen : ""} key={question}>
             <button type="button" aria-expanded={isOpen} onClick={() => setActiveFaq(isOpen ? null : index)}>
-              <span>{String(index + 1).padStart(2, "0")}</span><strong>{question}</strong><i aria-hidden>{isOpen ? "−" : "+"}</i>
+              <strong>{question}</strong><i aria-hidden>{isOpen ? "−" : "+"}</i>
             </button>
             <AnimatePresence initial={false}>
               {isOpen && <motion.div className={styles.faqAnswer} initial={prefersReducedMotion ? false : { height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={prefersReducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }} transition={{ duration: prefersReducedMotion ? 0 : .38, ease: [.22, 1, .36, 1] }}><p>{answer}</p></motion.div>}
             </AnimatePresence>
-          </article>;
+          </Reveal>;
         })}
       </div>
       <div className={styles.faqContact}>
