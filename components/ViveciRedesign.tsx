@@ -9,6 +9,8 @@ import { Reveal } from "./motion/Reveal";
 import { TextReveal } from "./motion/TextReveal";
 import { useParallax } from "@/hooks/useParallax";
 import { StickyHeader } from "./motion/StickyHeader";
+import { Cursor } from "./motion/Cursor";
+import { useMagnetic } from "@/hooks/useMagnetic";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import styles from "./viveci.module.css";
@@ -258,6 +260,7 @@ export function ViveciRedesign() {
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const heroPhoto = useParallax<HTMLDivElement>({ amount: -10 });
+  const ctaHero = useMagnetic<HTMLAnchorElement>();
   const isMobile = useIsMobile();
   const whatsappVisible = prefersReducedMotion || showWhatsApp;
 
@@ -459,6 +462,7 @@ export function ViveciRedesign() {
 
   return <main className={styles.site}>
     <StickyHeader />
+    <Cursor />
     <section ref={intro} className={styles.intro} id="inicio">
       <div className={styles.introSticky}>
         <AnimatePresence>
@@ -495,7 +499,7 @@ export function ViveciRedesign() {
           <div className={styles.heroCopy}>
             <h1>VIVECI</h1>
             <p className={styles.heroSub}><TextReveal as="strong" start="top 95%" delay={0.15}>Sua visão. Nossa tecnologia.</TextReveal><span>Sites que elevam a sua marca.</span></p>
-            <div className={styles.heroActions}><a className={styles.primaryButton} href="#contato">Ver meu modelo <span>→</span></a><a className={styles.secondaryButton} href="#projetos"><i>◇</i><span>Explorar projetos</span></a></div>
+            <div className={styles.heroActions}><a ref={ctaHero} className={styles.primaryButton} href="#contato">Ver meu modelo <span>→</span></a><a className={styles.secondaryButton} href="#projetos"><i>◇</i><span>Explorar projetos</span></a></div>
           </div>
           <p className={styles.heroDisciplines}>ESTRATÉGIA <i>/</i> DESIGN <i>/</i> TECNOLOGIA</p>
           <a className={styles.heroMouse} href="#servicos" aria-label="Ir para os serviços"><i/></a>
@@ -523,6 +527,7 @@ export function ViveciRedesign() {
           <div ref={projectsTrack} className={styles.projectsTrack}>
             {projects.map((project, index) => <motion.article
               className={styles.projectCard}
+              data-cursor="Ver"
               data-active={activeProject === index}
               key={project.area}
               initial={false}
