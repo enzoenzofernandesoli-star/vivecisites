@@ -592,7 +592,10 @@
   .headerCta{position:static!important;height:40px!important;padding:3px 4px 3px 14px!important;gap:10px!important;font-size:9px!important}
   .headerCta b{width:32px;height:32px;font-size:15px}
   .heroCopy{left:5vw;top:auto;bottom:15vh;width:90vw}
-  .heroCopy h1{font-size:clamp(3.8rem,20vw,6rem);letter-spacing:.12em}
+  /* VIVECI tem que caber numa linha só: quebrado em "VIVE" / "CI" o título
+     deixa de ser a marca. O nowrap garante a linha única e o corpo menor,
+     junto com o espaçamento mais fechado, garante que ela não estoure. */
+  .heroCopy h1{font-size:clamp(2.9rem,15vw,5.4rem);letter-spacing:.085em;white-space:nowrap}
   .heroSub{gap:.5rem;margin-bottom:1.35rem}
   .heroSub strong{font-size:1.15rem}
   .heroSub span{font-size:.82rem}
@@ -609,7 +612,6 @@
   .brand b,.brand>i{display:none}
   .headerCta{width:40px;padding:3px!important;border:0!important;background:transparent!important}
   .headerCta span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-  .heroCopy h1{font-size:17vw}
 }
 
 @media(prefers-reduced-motion:reduce){.heroMouse i{animation:none}}
