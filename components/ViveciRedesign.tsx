@@ -263,6 +263,9 @@ export function ViveciRedesign() {
   const heroPhoto = useParallax<HTMLDivElement>({ amount: -10 });
   const ctaHero = useMagnetic<HTMLAnchorElement>();
   const isMobile = useIsMobile();
+  // Com movimento reduzido o trilho nao e dirigido pelo scroll: o carrossel
+  // vira rolagem horizontal no dedo. No celular normal ele trava, como no desktop.
+  const carrosselNativo = prefersReducedMotion;
   const whatsappVisible = prefersReducedMotion || showWhatsApp;
 
   useEffect(() => {
@@ -339,7 +342,7 @@ export function ViveciRedesign() {
     if (!section || !track) return;
 
     const mm = gsap.matchMedia();
-    mm.add("(min-width: 769px) and (prefers-reduced-motion: no-preference)", () => {
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
       const last = projects.length - 1;
 
       const offsetOf = (index: number) => {
@@ -405,7 +408,7 @@ export function ViveciRedesign() {
 
   // Celular: o projeto ativo acompanha a posição do carrossel.
   useEffect(() => {
-    if (!isMobile) return;
+    if (!carrosselNativo) return;
     const viewport = projectsViewport.current;
     if (!viewport) return;
     const onScroll = () => {
@@ -416,7 +419,7 @@ export function ViveciRedesign() {
     onScroll();
     return () => viewport.removeEventListener("scroll", onScroll);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
+  }, [carrosselNativo]);
 
   useEffect(() => {
     const measure = () => {
@@ -426,7 +429,7 @@ export function ViveciRedesign() {
       const limit = Math.max(0, track.scrollWidth - viewport.clientWidth);
       setProjectDragLimit(limit);
       // Quem recentraliza no desktop agora e o ScrollTrigger (invalidateOnRefresh).
-      if (!isMobile) ScrollTrigger.refresh();
+      if (!carrosselNativo) ScrollTrigger.refresh();
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -434,11 +437,11 @@ export function ViveciRedesign() {
     if (projectsTrack.current) observer.observe(projectsTrack.current);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile, activeProject]);
+  }, [carrosselNativo, activeProject]);
 
   const goToProject = (index: number) => {
     // Celular: centraliza o card no carrossel — o scroll-snap trava nele.
-    if (isMobile) {
+    if (carrosselNativo) {
       const viewport = projectsViewport.current;
       const track = projectsTrack.current;
       const card = track?.children[index] as HTMLElement | undefined;
@@ -457,7 +460,7 @@ export function ViveciRedesign() {
   };
 
   const moveProjects = (direction: -1 | 1) => {
-    const from = isMobile ? nearestProject() : activeProject;
+    const from = carrosselNativo ? nearestProject() : activeProject;
     goToProject(Math.max(0, Math.min(projects.length - 1, from + direction)));
   };
 
@@ -524,7 +527,7 @@ export function ViveciRedesign() {
         <Reveal className={styles.projectsHead}>
           <span>Projetos</span><h2>Experiências feitas para impressionar.</h2><p>Explore o que podemos criar para o seu negócio.</p>
         </Reveal>
-        <div ref={projectsViewport} className={styles.projectsViewport} role="region" aria-label={isMobile ? "Galeria de projetos — arraste para o lado" : "Galeria horizontal de projetos controlada pelo scroll"}>
+        <div ref={projectsViewport} className={styles.projectsViewport} role="region" aria-label={carrosselNativo ? "Galeria de projetos — arraste para o lado" : "Galeria horizontal de projetos controlada pelo scroll"}>
           <div ref={projectsTrack} className={styles.projectsTrack}>
             {projects.map((project, index) => <motion.article
               className={styles.projectCard}
@@ -532,7 +535,7 @@ export function ViveciRedesign() {
               data-active={activeProject === index}
               key={project.area}
               initial={false}
-              animate={isMobile ? { scale: 1, opacity: 1, y: 0, rotateY: 0 } : {
+              animate={carrosselNativo ? { scale: 1, opacity: 1, y: 0, rotateY: 0 } : {
                 scale: activeProject === index ? 1 : .77,
                 opacity: activeProject === index ? 1 : .48,
                 y: activeProject === index ? 0 : 25,

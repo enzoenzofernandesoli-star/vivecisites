@@ -722,17 +722,17 @@
 .site .projectsClosing{width:calc(100% - 10vw);margin:2vh auto 0;padding-top:1.6vh;border-top:1px solid rgba(var(--steel-rgb),.18);color:rgba(var(--light-rgb),.67);font-size:11px;text-align:center}
 
 @media(max-width:800px){
-  .projects{height:auto;padding:14vw 0 12vw}
-  .projectsSticky{position:static;height:auto;padding:0;overflow:visible}
+  .projects{height:420vh;padding:0}
+  .projectsSticky{position:sticky;top:0;height:100vh;padding:6vh 0 4vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
   .projectsHead{padding:0 5vw 3vh}
   .projectsHead>span{margin-bottom:.8rem;font-size:7px}
   .projectsHead h2{max-width:330px;margin:0 auto;font-size:clamp(1.35rem,6.2vw,1.95rem);line-height:1.18;letter-spacing:.01em}
   .projectsHead>p{max-width:300px;margin:.8rem auto 0;font-size:11px;line-height:1.5}
-  /* o proprio viewport rola na horizontal e trava em um card */
-  .projectsViewport{height:auto;min-height:0;overflow-x:auto;overflow-y:hidden;perspective:none;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  /* a secao trava e o scroll vertical anda o trilho (igual ao desktop) */
+  .projectsViewport{height:auto;min-height:0;overflow:hidden;perspective:none}
   .projectsViewport::-webkit-scrollbar{display:none}
-  .projectsTrack{width:max-content;height:auto;padding:0 8vw;gap:4vw;transform:none!important;transform-style:flat}
-  .projectCard{width:84vw;height:auto;aspect-ratio:16/9;scroll-snap-align:center;scroll-snap-stop:always;transform:none!important;opacity:1!important}
+  .projectsTrack{width:max-content;height:auto;padding:0 8vw;gap:4vw;transform-style:flat}
+  .projectCard{width:84vw;height:auto;aspect-ratio:16/9;opacity:1!important}
   .projectShell{border-radius:10px}
   .projectMeta{min-height:118px;padding:2.2vh 5vw 0}
   .projectMeta>span{font-size:6px;letter-spacing:.25em;text-indent:.25em}
@@ -1109,3 +1109,14 @@
 .distortHost{position:absolute;inset:0}
 .distortCanvas{position:absolute;inset:0;width:100%!important;height:100%!important;opacity:0;transition:opacity .3s var(--ease-out)}
 .distortHost[data-pronto="true"] .distortCanvas{opacity:1}
+
+/* Movimento reduzido: sem o ScrollTrigger nada moveria o trilho, e a seção
+   ficaria travada por 9 telas. Ela encolhe e o carrossel rola no dedo. */
+@media (prefers-reduced-motion: reduce){
+  .projects{height:auto!important;padding:14vw 0 12vw}
+  .projectsSticky{position:static!important;height:auto!important;padding:0;overflow:visible}
+  .projectsViewport{height:auto!important;min-height:0;overflow-x:auto!important;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .projectsViewport::-webkit-scrollbar{display:none}
+  .projectsTrack{width:max-content;height:auto;transform:none!important}
+  .projectCard{scroll-snap-align:center;scroll-snap-stop:always;transform:none!important;opacity:1!important}
+}
