@@ -584,8 +584,8 @@ export function ViveciRedesign() {
           <div className={styles.heroShade} data-camada="fundo"/>
           <div className={styles.heroCopy}>
             <TextReveal as="h1" modo="chars" start="top 95%" delay={0.25} data-camada="titulo">VIVECI</TextReveal>
-            <p className={styles.heroSub}><TextReveal as="strong" start="top 95%" delay={0.15}>Sua visão. Nossa tecnologia.</TextReveal><span>Sites que elevam a sua marca.</span></p>
-            <div className={styles.heroActions}><a ref={ctaHero} className={styles.primaryButton} href="#contato">Ver meu modelo <span>→</span></a><a className={styles.secondaryButton} href="#projetos"><i>◇</i><span>Explorar projetos</span></a></div>
+            <p className={styles.heroSub} data-camada="texto"><TextReveal as="strong" start="top 95%" delay={0.15}>Sua visão. Nossa tecnologia.</TextReveal><span>Sites que elevam a sua marca.</span></p>
+            <div className={styles.heroActions} data-camada="texto"><a ref={ctaHero} className={styles.primaryButton} href="#contato">Ver meu modelo <span>→</span></a><a className={styles.secondaryButton} href="#projetos"><i>◇</i><span>Explorar projetos</span></a></div>
           </div>
           <p className={styles.heroDisciplines} data-camada="frente">ESTRATÉGIA <i>/</i> DESIGN <i>/</i> TECNOLOGIA</p>
           <a className={styles.heroMouse} href="#servicos" aria-label="Ir para os serviços"><i/></a>
