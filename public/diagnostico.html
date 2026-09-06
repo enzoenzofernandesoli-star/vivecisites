@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnóstico de animação — Viveci</title>
+<style>
+  body{margin:0;min-height:100vh;background:#050d1a;color:#eaf0f7;
+       font-family:system-ui,sans-serif;display:grid;place-items:center;padding:24px}
+  .caixa{max-width:640px;width:100%}
+  h1{font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:#6fa8ff;margin:0 0 24px}
+  .veredito{padding:28px;border-radius:14px;font-size:26px;line-height:1.3;font-weight:600;margin-bottom:28px}
+  .ligado{background:#0d2f1a;border:1px solid #2ea043;color:#7ee787}
+  .desligado{background:#3d1418;border:1px solid #d9534f;color:#ff9d9d}
+  .detalhe{font-size:15px;font-weight:400;margin-top:14px;line-height:1.6;opacity:.92}
+  .linha{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid rgba(255,255,255,.1);font-size:14px}
+  .linha b{font-weight:600}
+  .quadrado{width:64px;height:64px;border-radius:10px;background:#6fa8ff;margin:26px 0}
+  .anima{animation:vai 1.6s ease-in-out infinite alternate}
+  @keyframes vai{from{transform:translateX(0)}to{transform:translateX(240px)}}
+  .aviso{font-size:14px;line-height:1.65;opacity:.85;margin-top:8px}
+  code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="caixa">
+  <h1>Diagnóstico de animação</h1>
+  <div id="veredito" class="veredito">…</div>
+  <div id="quadrado" class="quadrado"></div>
+  <div id="tabela"></div>
+</div>
+<script>
+  var reduzido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var v = document.getElementById('veredito');
+  var q = document.getElementById('quadrado');
+
+  if (reduzido) {
+    v.className = 'veredito desligado';
+    v.innerHTML = 'ANIMAÇÕES DESLIGADAS NO SEU WINDOWS'
+      + '<div class="detalhe">O quadrado azul abaixo deveria estar indo e voltando. Se ele está parado, é essa configuração — e ela desliga TODA animação de TODO site, não só o seu.'
+      + '<br><br><b>Windows 10:</b> tecla Windows + I → Facilidade de Acesso → Vídeo → ligar “Mostrar animações no Windows”.'
+      + '<br><br>Depois volte aqui e recarregue com Ctrl+Shift+R.</div>';
+  } else {
+    v.className = 'veredito ligado';
+    v.innerHTML = 'ANIMAÇÕES LIGADAS'
+      + '<div class="detalhe">O quadrado azul abaixo deve estar indo e voltando sozinho.'
+      + '<br><br>Se ele está se mexendo mas o site não tem animação, o problema é do site — me avise que eu investigo.'
+      + '<br><br>Se ele está parado mesmo assim, a animação está bloqueada por outra coisa (extensão do navegador, por exemplo).</div>';
+    q.className = 'quadrado anima';
+  }
+
+  var linhas = [
+    ['Reduzir movimento do sistema', reduzido ? 'LIGADO (bloqueia animação)' : 'desligado (ok)'],
+    ['Largura da janela', innerWidth + 'px'],
+    ['Ponteiro fino (mouse)', matchMedia('(pointer: fine)').matches ? 'sim' : 'não (toque)'],
+    ['Navegador', navigator.userAgent.slice(0, 60) + '…']
+  ];
+  document.getElementById('tabela').innerHTML = linhas
+    .map(function (l) { return '<div class="linha"><span>' + l[0] + '</span><b>' + l[1] + '</b></div>'; })
+    .join('') + '<p class="aviso">Esta página não usa nada do site: é HTML puro. Se o quadrado não anda aqui, nenhum site do mundo vai animar nesse navegador.</p>';
+</script>
+</body>
+</html>

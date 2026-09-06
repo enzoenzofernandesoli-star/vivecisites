@@ -15,6 +15,8 @@ export function useTextReveal<T extends HTMLElement>(options?: {
   stagger?: number;
   duration?: number;
   delay?: number;
+  /** "words" (padrão) para frases; "chars" para wordmark, letra a letra. */
+  modo?: "words" | "chars";
 }) {
   const ref = useRef<T>(null);
 
@@ -30,9 +32,14 @@ export function useTextReveal<T extends HTMLElement>(options?: {
       document.fonts.ready.then(() => {
         if (cancelled || !ref.current) return;
 
-        split = new SplitText(el, { type: "lines,words", linesClass: "reveal-line" });
+        const porLetra = options?.modo === "chars";
+        split = new SplitText(el, {
+          type: porLetra ? "chars" : "lines,words",
+          linesClass: "reveal-line",
+        });
+        const alvos = porLetra ? split.chars : split.words;
 
-        gsap.from(split.words, {
+        gsap.from(alvos, {
           yPercent: 115,
           duration: options?.duration ?? 1,
           ease: "expo.out",

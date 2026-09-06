@@ -11,6 +11,7 @@ export function TextReveal({
   className = "",
   start,
   delay,
+  modo,
   children,
   ...rest
 }: {
@@ -18,9 +19,10 @@ export function TextReveal({
   className?: string;
   start?: string;
   delay?: number;
+  modo?: "words" | "chars";
   children: React.ReactNode;
 } & React.HTMLAttributes<HTMLElement>) {
-  const ref = useTextReveal<HTMLElement>({ start, delay });
+  const ref = useTextReveal<HTMLElement>({ start, delay, modo });
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <Tag ref={ref as any} className={className} {...rest}>

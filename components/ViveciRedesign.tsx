@@ -7,6 +7,7 @@ import { ContactForm } from "./ContactForm";
 import { LOGO_DRAW_DURATION, VVCLogo } from "./VVCLogo";
 import { Reveal } from "./motion/Reveal";
 import { TextReveal } from "./motion/TextReveal";
+import { Stagger } from "./motion/Stagger";
 import { useParallax } from "@/hooks/useParallax";
 import { StickyHeader } from "./motion/StickyHeader";
 import { Cursor } from "./motion/Cursor";
@@ -501,7 +502,7 @@ export function ViveciRedesign() {
           </div>
           <div className={styles.heroShade}/>
           <div className={styles.heroCopy}>
-            <h1>VIVECI</h1>
+            <TextReveal as="h1" modo="chars" start="top 95%" delay={0.25}>VIVECI</TextReveal>
             <p className={styles.heroSub}><TextReveal as="strong" start="top 95%" delay={0.15}>Sua visão. Nossa tecnologia.</TextReveal><span>Sites que elevam a sua marca.</span></p>
             <div className={styles.heroActions}><a ref={ctaHero} className={styles.primaryButton} href="#contato">Ver meu modelo <span>→</span></a><a className={styles.secondaryButton} href="#projetos"><i>◇</i><span>Explorar projetos</span></a></div>
           </div>
@@ -524,9 +525,9 @@ export function ViveciRedesign() {
 
     <section ref={projectsSection} className={styles.projects} id="projetos">
       <div className={styles.projectsSticky}>
-        <Reveal className={styles.projectsHead}>
-          <span>Projetos</span><h2>Experiências feitas para impressionar.</h2><p>Explore o que podemos criar para o seu negócio.</p>
-        </Reveal>
+        <div className={styles.projectsHead}>
+          <span>Projetos</span><TextReveal as="h2">Experiências feitas para impressionar.</TextReveal><p>Explore o que podemos criar para o seu negócio.</p>
+        </div>
         <div ref={projectsViewport} className={styles.projectsViewport} role="region" aria-label={carrosselNativo ? "Galeria de projetos — arraste para o lado" : "Galeria horizontal de projetos controlada pelo scroll"}>
           <div ref={projectsTrack} className={styles.projectsTrack}>
             {projects.map((project, index) => <motion.article
@@ -572,11 +573,11 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.processSection} id="processo">
-      <Reveal className={styles.processHeading}>
+      <div className={styles.processHeading}>
         <span>Como funciona</span>
-        <h2>Um processo claro. Sem surpresas.</h2>
+        <TextReveal as="h2">Um processo claro. Sem surpresas.</TextReveal>
         <p>Você acompanha cada etapa, do primeiro contato ao site publicado.</p>
-      </Reveal>
+      </div>
 
       {/*
         Fluxo em ziguezague: cada etapa entra quando alcança a tela e um raio
@@ -598,16 +599,16 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.technology} id="tecnologia">
-      <Reveal className={styles.technologyHeading}>
-        <div><span>Tecnologia</span><h2>Uma base sólida.<br/>Infinitas possibilidades.</h2></div>
+      <div className={styles.technologyHeading}>
+        <div><span>Tecnologia</span><TextReveal as="h2">Uma base sólida. Infinitas possibilidades.</TextReveal></div>
         <p>Cada produto combina interface, lógica e dados em uma experiência integrada.</p>
-      </Reveal>
+      </div>
       <span className={styles.stackLabel}>Stack ilustrativa · a validar</span>
       <div className={styles.technologyStack}>
         {technologyLayers.map((layer, index) => <Reveal as="article" index={index} className={styles.technologyLayer} key={layer.title}>
           <b className={styles.layerNumber}>{String(index + 1).padStart(2, "0")}</b>
           <div className={styles.layerCopy}><h3>{layer.title}</h3><i/><p>{layer.description}</p></div>
-          <div className={styles.technologyItems}>{layer.technologies.map((technology) => <div className={styles.technologyItem} key={technology}><TechIcon name={technology}/><span>{technology}</span></div>)}</div>
+          <Stagger className={styles.technologyItems} intervalo={0.05} deslocamento={12}>{layer.technologies.map((technology) => <div className={styles.technologyItem} key={technology}><TechIcon name={technology}/><span>{technology}</span></div>)}</Stagger>
         </Reveal>)}
       </div>
       <div className={styles.technologyDeploy}>
@@ -618,7 +619,7 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.faqSection} id="duvidas">
-      <Reveal className={styles.faqHeading}><span>Perguntas frequentes</span><h2>Tudo claro para começar.</h2><p>As respostas que você precisa, sem complicação.</p></Reveal>
+      <div className={styles.faqHeading}><span>Perguntas frequentes</span><TextReveal as="h2">Tudo claro para começar.</TextReveal><p>As respostas que você precisa, sem complicação.</p></div>
       <div className={styles.faqList}>
         {frequentlyAskedQuestions.map(([question, answer], index) => {
           const isOpen = activeFaq === index;
@@ -639,11 +640,11 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.contact} id="contato">
-      <Reveal className={styles.contactIntro}>
+      <div className={styles.contactIntro}>
         <span>Vamos ver como fica?</span>
-        <h2>Seu próximo site <br/>começa com <br/>um modelo.</h2>
+        <TextReveal as="h2">Seu próximo site começa com um modelo.</TextReveal>
         <p>Veja uma primeira ideia com a identidade da sua empresa. Depois, você decide.</p>
-      </Reveal>
+      </div>
       <div className={styles.contactRobot} aria-hidden>
         <i />
         <Image src="/images/vvc-android-hero.png" fill quality={100} sizes="(max-width: 800px) 90vw, 42vw" alt="" />
@@ -667,6 +668,6 @@ export function ViveciRedesign() {
       <span>Falar com a Viveci</span>
     </motion.a>
 
-    <footer className={styles.footer}><div className={styles.footerGrid}><div><b>VIVECI</b><span>/ DIGITAL STUDIO</span><p>Sites para negócios que atendem gente todo dia.</p></div><div><span>NAVEGAÇÃO</span><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a href="#duvidas">Dúvidas</a></div><div><span>CONTATO</span><a href="#contato">Falar comigo</a><p>Atendimento direto com quem faz.</p></div><div className={styles.footerLogo}><VVCLogo/></div></div><div className={styles.copyright}><span>© 2026 VIVECI DIGITAL STUDIO</span><a href="#inicio">VOLTAR AO TOPO ↑</a></div></footer>
+    <footer className={styles.footer}><Stagger className={styles.footerGrid} intervalo={0.07}><div><b>VIVECI</b><span>/ DIGITAL STUDIO</span><p>Sites para negócios que atendem gente todo dia.</p></div><div><span>NAVEGAÇÃO</span><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a href="#duvidas">Dúvidas</a></div><div><span>CONTATO</span><a href="#contato">Falar comigo</a><p>Atendimento direto com quem faz.</p></div><div className={styles.footerLogo}><VVCLogo/></div></Stagger><div className={styles.copyright}><span>© 2026 VIVECI DIGITAL STUDIO</span><a href="#inicio">VOLTAR AO TOPO ↑</a></div></footer>
   </main>;
 }
