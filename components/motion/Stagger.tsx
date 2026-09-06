@@ -38,7 +38,7 @@ export function Stagger({
         duration: 0.6,
         ease: "power3.out",
         stagger: intervalo,
-        scrollTrigger: { trigger: el, start: "top 88%", once: true },
+        scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
       });
     },
     { scope: ref }

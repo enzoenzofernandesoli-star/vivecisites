@@ -45,7 +45,11 @@ export function useTextReveal<T extends HTMLElement>(options?: {
           ease: "expo.out",
           stagger: options?.stagger ?? 0.025,
           delay: options?.delay ?? 0,
-          scrollTrigger: { trigger: el, start: options?.start ?? "top 80%", once: true },
+          scrollTrigger: {
+            trigger: el,
+            start: options?.start ?? "top 80%",
+            toggleActions: "play none none reverse",
+          },
         });
       });
 

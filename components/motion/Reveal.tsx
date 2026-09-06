@@ -37,7 +37,12 @@ export function Reveal({
         duration: 0.8,
         ease: "power3.out",
         delay: index * 0.055,
-        scrollTrigger: { trigger: el, start: "top 85%", once: true },
+        scrollTrigger: {
+          trigger: el,
+          start: "top 85%",
+          // desfaz ao subir e refaz ao descer de novo
+          toggleActions: "play none none reverse",
+        },
       });
     },
     { scope: ref, dependencies: [index] }

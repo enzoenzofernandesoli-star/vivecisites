@@ -35,7 +35,7 @@ export function ServiceCard({
 
       const tl = gsap.timeline({
         defaults: { ease: "power3.out" },
-        scrollTrigger: { trigger: el, start: "top 88%", once: true },
+        scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
       });
 
       tl.from(el, { opacity: 0, y: 34, duration: 0.65, delay: atraso })
