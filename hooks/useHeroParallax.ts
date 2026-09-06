@@ -31,22 +31,24 @@ export function useHeroParallax(scope: RefObject<HTMLElement | null>) {
          * subtítulo e os dois se sobrepõem.
          */
         const camadas: { sel: string; y: number; fade?: [number, number] }[] = [
-          { sel: "[data-camada='fundo']", y: 34 },
-          { sel: "[data-camada='foto']", y: 22 },
+          { sel: "[data-camada='fundo']", y: 52 },
+          { sel: "[data-camada='foto']", y: 34 },
           // o wordmark desce bem mais e desaparece na segunda metade
-          { sel: "[data-camada='titulo']", y: 190, fade: [0.45, 0.9] },
+          { sel: "[data-camada='titulo']", y: 260, fade: [0.55, 0.95] },
           // o texto de apoio desce MAIS que o wordmark: fica sempre a frente,
           // abrindo distancia em vez de ser alcancado por ele
-          { sel: "[data-camada='texto']", y: 470, fade: [0.08, 0.36] },
-          { sel: "[data-camada='frente']", y: 420, fade: [0.3, 0.7] },
+          { sel: "[data-camada='texto']", y: 620, fade: [0.04, 0.2] },
+          { sel: "[data-camada='frente']", y: 560, fade: [0.12, 0.4] },
         ];
 
         const tl = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
-            trigger: raiz,
+            // percorre a secao inteira do heroi (alta, com o conteudo grudado
+            // no topo), e nao apenas uma tela: da tempo de ver o parallax
+            trigger: raiz.closest("section") ?? raiz,
             start: "top top",
-            end: "bottom top",
+            end: "bottom bottom",
             scrub: 0.5,
             invalidateOnRefresh: true,
           },
