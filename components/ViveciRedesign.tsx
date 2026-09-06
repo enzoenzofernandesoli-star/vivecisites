@@ -111,7 +111,7 @@ function ProcessFlowStep({
           <path
             data-fluxo-curva
             pathLength={1}
-            d={side === "right" ? "M 22 0 C 22 46, 78 54, 78 100" : "M 78 0 C 78 46, 22 54, 22 100"}
+            d={side === "right" ? "M 18 0 C 18 38, 82 62, 82 100" : "M 82 0 C 82 38, 18 62, 18 100"}
           />
         </svg>
       )}
@@ -151,30 +151,36 @@ function ProcessFlow({ semMovimento }: { semMovimento: boolean }) {
 
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.set(curvas, { strokeDasharray: 1, strokeDashoffset: 1 });
+        curvas.forEach((c) => { c.style.strokeDasharray = "1"; c.style.strokeDashoffset = "1"; });
         itens.forEach((_, i) => acender(i, i === 0));
 
         const tl = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
             trigger: lista,
-            start: "top 72%",
-            end: "bottom 78%",
-            scrub: 1,
+            start: "top 85%",
+            end: "bottom 55%",
+            scrub: 1.2,
           },
         });
 
-        // a primeira etapa já está acesa; cada trecho desenha e entrega a próxima
+        /**
+         * O valor é interpolado num objeto e escrito à mão no atributo.
+         * Animar `strokeDashoffset` direto, com pathLength normalizado, faz o
+         * GSAP escrever só os extremos (1px e 0px) — a linha aparecia de uma
+         * vez em vez de ser desenhada.
+         */
         curvas.forEach((curva, i) => {
-          tl.to(curva, {
-            strokeDashoffset: 0,
+          const estado = { v: 1 };
+          tl.to(estado, {
+            v: 0,
             duration: 1,
-            onUpdate: function () {
-              // acende assim que a linha praticamente chega
-              acender(i + 1, this.progress() > 0.82);
+            onUpdate: () => {
+              curva.style.strokeDashoffset = String(estado.v);
+              acender(i + 1, estado.v < 0.16);
             },
           });
-          tl.to({}, { duration: 0.35 });
+          tl.to({}, { duration: 0.22 });
         });
 
         return () => { tl.scrollTrigger?.kill(); tl.kill(); };
