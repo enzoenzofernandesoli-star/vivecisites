@@ -8,6 +8,7 @@ import { LOGO_DRAW_DURATION, VVCLogo } from "./VVCLogo";
 import { Reveal } from "./motion/Reveal";
 import { TextReveal } from "./motion/TextReveal";
 import { Stagger } from "./motion/Stagger";
+import { ServiceCard } from "./motion/ServiceCard";
 import { useParallax } from "@/hooks/useParallax";
 import { StickyHeader } from "./motion/StickyHeader";
 import { Cursor } from "./motion/Cursor";
@@ -90,27 +91,30 @@ function ProcessIcon({ name }: { name: (typeof process)[number]["icon"] }) {
  * desenha e o card sobe logo atrás. A revelação é feita por transição de CSS
  * sobre `data-shown` — mais previsível que animar `clip-path` pelo framer.
  */
+/**
+ * Uma etapa do fluxo. É só marcação: quem anima é o orquestrador da seção,
+ * para que o traço corra continuamente de uma etapa à seguinte em vez de
+ * quatro desenhos independentes.
+ */
 function ProcessFlowStep({
   step,
   index,
-  alwaysVisible,
 }: {
   step: (typeof process)[number];
   index: number;
-  alwaysVisible: boolean;
 }) {
-  const ref = useRef<HTMLLIElement>(null);
-  const inView = useInView(ref, { once: true, amount: .4 });
   const side = index % 2 === 0 ? "left" : "right";
-
   return (
-    <li
-      ref={ref}
-      className={styles.processFlowItem}
-      data-side={side}
-      data-shown={alwaysVisible || inView ? "true" : "false"}
-    >
-      {index > 0 && <span className={styles.processBolt} aria-hidden />}
+    <li className={styles.processFlowItem} data-side={side} data-fluxo-item>
+      {index > 0 && (
+        <svg className={styles.processBolt} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+          <path
+            data-fluxo-curva
+            pathLength={1}
+            d={side === "right" ? "M 22 0 C 22 46, 78 54, 78 100" : "M 78 0 C 78 46, 22 54, 22 100"}
+          />
+        </svg>
+      )}
       <div className={styles.processFlowCard}>
         <span className={styles.processCardIcon}><ProcessIcon name={step.icon} /></span>
         <h3>{step.title}</h3>
@@ -118,6 +122,75 @@ function ProcessFlowStep({
         <p>{step.description}</p>
       </div>
     </li>
+  );
+}
+
+/**
+ * Orquestra o fluxo inteiro num único scrub: o traço corre da etapa 1 até a 5
+ * conforme a seção passa pela tela, e cada etapa acende quando a linha chega
+ * nela. É isso que dá a sensação de percurso, e não de itens soltos surgindo.
+ */
+function ProcessFlow({ semMovimento }: { semMovimento: boolean }) {
+  const ref = useRef<HTMLOListElement>(null);
+
+  useGSAP(
+    () => {
+      const lista = ref.current;
+      if (!lista) return;
+
+      const itens = Array.from(lista.querySelectorAll<HTMLElement>("[data-fluxo-item]"));
+      const curvas = Array.from(lista.querySelectorAll<SVGPathElement>("[data-fluxo-curva]"));
+
+      const acender = (i: number, ligado: boolean) =>
+        itens[i]?.setAttribute("data-shown", ligado ? "true" : "false");
+
+      if (semMovimento) {
+        itens.forEach((_, i) => acender(i, true));
+        return;
+      }
+
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.set(curvas, { strokeDasharray: 1, strokeDashoffset: 1 });
+        itens.forEach((_, i) => acender(i, i === 0));
+
+        const tl = gsap.timeline({
+          defaults: { ease: "none" },
+          scrollTrigger: {
+            trigger: lista,
+            start: "top 72%",
+            end: "bottom 78%",
+            scrub: 1,
+          },
+        });
+
+        // a primeira etapa já está acesa; cada trecho desenha e entrega a próxima
+        curvas.forEach((curva, i) => {
+          tl.to(curva, {
+            strokeDashoffset: 0,
+            duration: 1,
+            onUpdate: function () {
+              // acende assim que a linha praticamente chega
+              acender(i + 1, this.progress() > 0.82);
+            },
+          });
+          tl.to({}, { duration: 0.35 });
+        });
+
+        return () => { tl.scrollTrigger?.kill(); tl.kill(); };
+      });
+
+      return () => mm.revert();
+    },
+    { scope: ref, dependencies: [semMovimento] }
+  );
+
+  return (
+    <ol ref={ref} className={styles.processFlow}>
+      {process.map((step, index) => (
+        <ProcessFlowStep key={step.title} step={step} index={index} />
+      ))}
+    </ol>
   );
 }
 
@@ -514,12 +587,15 @@ export function ViveciRedesign() {
 
     <section className={styles.services} id="servicos">
       <div className={styles.servicesIntro}><span>Nossos serviços</span><TextReveal as="h2">O que a Viveci faz.</TextReveal><p>Quatro frentes. Uma presença digital completa.</p></div>
-      <div className={styles.serviceGrid}>{serviceObjectives.map((objective, index)=><Reveal as="article" index={index} className={styles.serviceObjective} key={objective.title}>
-        <div className={styles.serviceIcon}><ServiceIcon type={objective.icon}/></div>
-        <h3>{objective.title}</h3>
-        <p className={styles.servicePurpose}>{objective.purpose}</p>
-        <a className={styles.serviceLink} href="#contato">Saiba mais <span>↗</span></a>
-      </Reveal>)}</div>
+      <div className={styles.serviceGrid}>{serviceObjectives.map((objective, index)=>(
+        <ServiceCard
+          key={objective.title}
+          index={index}
+          icone={<ServiceIcon type={objective.icon}/>}
+          titulo={objective.title}
+          texto={objective.purpose}
+        />
+      ))}</div>
       <div className={styles.servicesFooter}><p>Da ideia à evolução do seu negócio.</p><a href="#contato">Vamos conversar</a></div>
     </section>
 
@@ -583,16 +659,7 @@ export function ViveciRedesign() {
         Fluxo em ziguezague: cada etapa entra quando alcança a tela e um raio
         diagonal desenha o caminho até a próxima, alternando os lados.
       */}
-      <ol className={styles.processFlow}>
-        {process.map((step, index) => (
-          <ProcessFlowStep
-            key={step.title}
-            step={step}
-            index={index}
-            alwaysVisible={prefersReducedMotion}
-          />
-        ))}
-      </ol>
+      <ProcessFlow semMovimento={prefersReducedMotion} />
 
       <p className={styles.processClosing}>Veja primeiro. Decida depois.</p>
       <a className={styles.processCta} href="#contato">Quero ver meu modelo <b>↗</b></a>

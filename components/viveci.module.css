@@ -779,12 +779,9 @@
 .processFlowItem[data-side="left"] .processFlowCard{grid-column:1}
 .processFlowItem[data-side="right"] .processFlowCard{grid-column:2}
 
-/* raio: diagonal em gradiente (a faixa sai perpendicular ao eixo), com as
-   pontas dissolvidas na máscara para não terminar em corte seco */
-.processBolt{position:absolute;top:0;left:25%;width:50%;height:clamp(52px,6vw,88px);pointer-events:none;clip-path:inset(0% 100% 0% 0%);transition:clip-path .6s var(--ease-in-out);filter:drop-shadow(0 0 6px rgba(var(--signal-rgb),.55));-webkit-mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent)}
-.processFlowItem[data-side="right"] .processBolt{background:linear-gradient(to top right,transparent calc(50% - .8px),rgba(var(--signal-rgb),.9) calc(50% - .8px),rgba(var(--signal-rgb),.9) calc(50% + .8px),transparent calc(50% + .8px))}
-.processFlowItem[data-side="left"] .processBolt{background:linear-gradient(to top left,transparent calc(50% - .8px),rgba(var(--signal-rgb),.9) calc(50% - .8px),rgba(var(--signal-rgb),.9) calc(50% + .8px),transparent calc(50% + .8px));clip-path:inset(0% 0% 0% 100%)}
-.processFlowItem[data-shown="true"] .processBolt{clip-path:inset(0% 0% 0% 0%)}
+/* Traço do fluxo: curva em S desenhada conforme o scroll (ver ProcessFlowStep). */
+.processBolt{position:absolute;top:0;left:25%;width:50%;height:clamp(52px,6vw,88px);overflow:visible;pointer-events:none;filter:drop-shadow(0 0 6px rgba(var(--signal-rgb),.5))}
+.processBolt path{fill:none;stroke:rgba(var(--signal-rgb),.9);stroke-width:1.6;stroke-linecap:round;vector-effect:non-scaling-stroke}
 
 /* sem moldura: o peso fica no ícone e no texto */
 .processFlowCard{display:flex;width:min(330px,92%);margin:0 auto;flex-direction:column;align-items:center;text-align:center}
@@ -812,8 +809,7 @@
   .processHeading p{max-width:320px;margin:1rem auto 0;line-height:1.55}
   .processFlowItem{grid-template-columns:1fr;padding-top:13vw}
   .processFlowItem[data-side="left"] .processFlowCard,.processFlowItem[data-side="right"] .processFlowCard{grid-column:1}
-  .processBolt{left:calc(50% - 1px);width:2px;height:13vw;clip-path:inset(100% 0% 0% 0%)!important;background:linear-gradient(180deg,rgba(var(--signal-rgb),.9),rgba(var(--signal-rgb),.25))!important;-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent);mask-image:linear-gradient(180deg,#000 70%,transparent)}
-  .processFlowItem[data-shown="true"] .processBolt{clip-path:inset(0% 0% 0% 0%)!important}
+  .processBolt{left:38%;width:24%;height:13vw}
   .processFlowCard{width:min(320px,88%)}
   .processFlowCard p{max-width:none}
   .site .processClosing{margin-top:8vw;font-size:16px}
@@ -1119,4 +1115,9 @@
   .projectsViewport::-webkit-scrollbar{display:none}
   .projectsTrack{width:max-content;height:auto;transform:none!important}
   .projectCard{scroll-snap-align:center;scroll-snap-stop:always;transform:none!important;opacity:1!important}
+}
+
+/* Movimento reduzido: a curva não é desenhada, aparece pronta. */
+@media (prefers-reduced-motion: reduce){
+  .processBolt path{stroke-dasharray:none!important;stroke-dashoffset:0!important}
 }
