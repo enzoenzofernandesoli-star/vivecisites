@@ -426,26 +426,58 @@ export function ViveciRedesign() {
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       const last = projects.length - 1;
 
-      const offsetOf = (index: number) => {
+      /**
+       * Deslocamento de cada card, medido uma vez por refresh. Ler
+       * `offsetLeft` a cada frame forçaria reflow no meio da rolagem.
+       */
+      let offsets: number[] = [];
+      const medir = () => {
         const viewport = projectsViewport.current;
-        const card = track.children[index] as HTMLElement | undefined;
-        if (!viewport || !card) return 0;
-        return card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
+        if (!viewport) return;
+        offsets = projects.map((_, i) => {
+          const card = track.children[i] as HTMLElement | undefined;
+          if (!card) return 0;
+          return card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
+        });
+      };
+      medir();
+
+      /**
+       * Posição contínua: interpola entre o card atual e o próximo.
+       * Antes o trilho era colocado direto no card arredondado, então
+       * a troca era um salto; agora ele desliza e o `snap` só assenta.
+       */
+      const posicaoEm = (progresso: number) => {
+        if (!offsets.length) return 0;
+        const bruto = Math.max(0, Math.min(last, progresso * last));
+        const i = Math.min(last, Math.floor(bruto));
+        const j = Math.min(last, i + 1);
+        return offsets[i] + (offsets[j] - offsets[i]) * (bruto - i);
       };
 
       const st = ScrollTrigger.create({
         trigger: section,
         start: "top top",
         end: "bottom bottom",
-        scrub: 0.6,
-        snap: { snapTo: 1 / last, duration: 0.35, ease: "power2.inOut" },
+        scrub: 0.45,
+        snap: {
+          snapTo: 1 / last,
+          duration: { min: 0.18, max: 0.45 },
+          delay: 0.04,
+          ease: "power2.out",
+        },
         invalidateOnRefresh: true,
+        onRefresh: (self) => {
+          medir();
+          gsap.set(track, { x: -posicaoEm(self.progress) });
+        },
         onUpdate: (self) => {
-          const index = Math.max(0, Math.min(last, Math.round(self.progress * last)));
-          gsap.set(track, { x: -offsetOf(index) });
+          const progresso = self.progress;
+          gsap.set(track, { x: -posicaoEm(progresso) });
           if (projectsBar.current) {
-            gsap.set(projectsBar.current, { scaleX: 0.16 + 0.84 * (last ? index / last : 1) });
+            gsap.set(projectsBar.current, { scaleX: 0.16 + 0.84 * progresso });
           }
+          const index = Math.max(0, Math.min(last, Math.round(progresso * last)));
           setActiveProject((current) => (current === index ? current : index));
         },
       });
@@ -626,7 +658,7 @@ export function ViveciRedesign() {
                 y: activeProject === index ? 0 : 25,
                 rotateY: activeProject === index ? 0 : index < activeProject ? 8 : -8,
               }}
-              transition={{ duration: .34, ease: [.22, 1, .36, 1] }}
+              transition={{ duration: .5, ease: [.22, 1, .36, 1] }}
             >
               <div className={styles.projectShell}>
                 <div className={styles.projectImage}>
