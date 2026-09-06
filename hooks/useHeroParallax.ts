@@ -27,12 +27,18 @@ export function useHeroParallax(scope: RefObject<HTMLElement | null>) {
          * não são comparáveis entre si — vêm calibrados pela altura medida
          * de cada camada.
          *
-         * O texto também some ao descer: sem isso o wordmark alcança o
-         * subtítulo e os dois se sobrepõem.
+         * Sinal importa. Enquanto o herói está presente no topo, a página não
+         * o carrega para cima: valor positivo vira descida pura na tela.
+         * Por isso só o wordmark e o texto descem; fundo e foto derivam para
+         * cima devagar, que é o que cria profundidade sem parecer que a
+         * imagem "caiu e voltou".
+         *
+         * O texto some ao descer: sem isso o wordmark o alcança e os dois se
+         * sobrepõem.
          */
         const camadas: { sel: string; y: number; fade?: [number, number] }[] = [
-          { sel: "[data-camada='fundo']", y: 52 },
-          { sel: "[data-camada='foto']", y: 34 },
+          { sel: "[data-camada='fundo']", y: -14 },
+          { sel: "[data-camada='foto']", y: -9 },
           // o wordmark desce bem mais e desaparece na segunda metade
           { sel: "[data-camada='titulo']", y: 260, fade: [0.55, 0.95] },
           // o texto de apoio desce MAIS que o wordmark: fica sempre a frente,
