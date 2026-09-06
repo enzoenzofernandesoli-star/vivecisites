@@ -103,15 +103,30 @@ function ProcessFlowStep({
   step: (typeof process)[number];
   index: number;
 }) {
+  /*
+   * O viewBox do conector tem a largura da lista (920) para que o traço nasça
+   * e termine no centro do ícone de cada etapa — 230 e 690, ou seja 25% e 75%.
+   * Antes a caixa ocupava só o miolo e a linha parava a 112px do ícone dos dois
+   * lados: desenhava certo, mas não encostava em nada.
+   *
+   * São duas versões do traço: a larga cruza entre as colunas do desktop, a
+   * estreita liga dois cards centralizados do mobile. O CSS mostra uma por vez
+   * e o orquestrador anima só a visível.
+   */
   const side = index % 2 === 0 ? "left" : "right";
   return (
     <li className={styles.processFlowItem} data-side={side} data-fluxo-item>
       {index > 0 && (
-        <svg className={styles.processBolt} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+        <svg className={styles.processBolt} viewBox="0 0 920 180" preserveAspectRatio="none" aria-hidden>
           <path
-            data-fluxo-curva
+            data-fluxo-curva="amplo"
             pathLength={1}
-            d={side === "right" ? "M 18 0 C 18 38, 82 62, 82 100" : "M 82 0 C 82 38, 18 62, 18 100"}
+            d={side === "right" ? "M 230 0 C 230 84, 690 96, 690 180" : "M 690 0 C 690 84, 230 96, 230 180"}
+          />
+          <path
+            data-fluxo-curva="estreito"
+            pathLength={1}
+            d={side === "right" ? "M 460 0 C 330 58, 590 122, 460 180" : "M 460 0 C 590 58, 330 122, 460 180"}
           />
         </svg>
       )}
@@ -139,7 +154,9 @@ function ProcessFlow({ semMovimento }: { semMovimento: boolean }) {
       if (!lista) return;
 
       const itens = Array.from(lista.querySelectorAll<HTMLElement>("[data-fluxo-item]"));
-      const curvas = Array.from(lista.querySelectorAll<SVGPathElement>("[data-fluxo-curva]"));
+      const todasAsCurvas = Array.from(
+        lista.querySelectorAll<SVGPathElement>("[data-fluxo-curva]")
+      );
 
       const acender = (i: number, ligado: boolean) =>
         itens[i]?.setAttribute("data-shown", ligado ? "true" : "false");
@@ -149,9 +166,16 @@ function ProcessFlow({ semMovimento }: { semMovimento: boolean }) {
         return;
       }
 
-      const mm = gsap.matchMedia();
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        curvas.forEach((c) => { c.style.strokeDasharray = "1"; c.style.strokeDashoffset = "1"; });
+      const montar = (qual: "amplo" | "estreito") => {
+        const curvas = Array.from(
+          lista.querySelectorAll<SVGPathElement>(`[data-fluxo-curva="${qual}"]`)
+        );
+        // inclusive as do outro traço: se a largura mudar no meio do caminho,
+        // nenhuma pode ficar desenhada por conta de um contexto anterior
+        todasAsCurvas.forEach((c) => {
+          c.style.strokeDasharray = "1";
+          c.style.strokeDashoffset = "1";
+        });
         itens.forEach((_, i) => acender(i, i === 0));
 
         const tl = gsap.timeline({
@@ -177,14 +201,19 @@ function ProcessFlow({ semMovimento }: { semMovimento: boolean }) {
             duration: 1,
             onUpdate: () => {
               curva.style.strokeDashoffset = String(estado.v);
-              acender(i + 1, estado.v < 0.16);
+              // a etapa só acende quando o traço encosta nela
+              acender(i + 1, estado.v < 0.05);
             },
           });
           tl.to({}, { duration: 0.22 });
         });
 
         return () => { tl.scrollTrigger?.kill(); tl.kill(); };
-      });
+      };
+
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference) and (min-width: 801px)", () => montar("amplo"));
+      mm.add("(prefers-reduced-motion: no-preference) and (max-width: 800px)", () => montar("estreito"));
 
       return () => mm.revert();
     },
