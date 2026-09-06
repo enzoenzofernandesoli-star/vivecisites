@@ -9,7 +9,7 @@ import { Reveal } from "./motion/Reveal";
 import { TextReveal } from "./motion/TextReveal";
 import { Stagger } from "./motion/Stagger";
 import { ServiceCard } from "./motion/ServiceCard";
-import { useParallax } from "@/hooks/useParallax";
+import { useHeroParallax } from "@/hooks/useHeroParallax";
 import { StickyHeader } from "./motion/StickyHeader";
 import { Cursor } from "./motion/Cursor";
 import { DistortionImage } from "./motion/DistortionImage";
@@ -334,7 +334,8 @@ export function ViveciRedesign() {
   const [activeFaq, setActiveFaq] = useState<number | null>(2);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
-  const heroPhoto = useParallax<HTMLDivElement>({ amount: -10 });
+  const heroRef = useRef<HTMLDivElement>(null);
+  useHeroParallax(heroRef);
   const ctaHero = useMagnetic<HTMLAnchorElement>();
   const isMobile = useIsMobile();
   // Com movimento reduzido o trilho nao e dirigido pelo scroll: o carrossel
@@ -559,6 +560,7 @@ export function ViveciRedesign() {
 
         <motion.div
           className={styles.hero}
+          ref={heroRef}
           initial={false}
           animate={{
             opacity: introPhase === "draw" ? 0 : 1,
@@ -570,16 +572,16 @@ export function ViveciRedesign() {
             <a className={styles.brand} href="#inicio" aria-label="Viveci — início"><VVCLogo/><i/><b>VIVECI</b></a>
             <nav aria-label="Navegação principal"><a href="#inicio">Início</a><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a className={styles.headerCta} href="#contato" aria-label="Iniciar projeto"><span>Iniciar projeto</span><b>→</b></a></nav>
           </header>
-          <div ref={heroPhoto} className={styles.heroPhoto}>
+          <div className={styles.heroPhoto} data-camada="foto">
             <Image src="/images/vvc-android-hero.png" fill preload quality={100} sizes="100vw" alt="Android de acabamento preto e azul representando a tecnologia da Viveci" />
           </div>
-          <div className={styles.heroShade}/>
+          <div className={styles.heroShade} data-camada="fundo"/>
           <div className={styles.heroCopy}>
-            <TextReveal as="h1" modo="chars" start="top 95%" delay={0.25}>VIVECI</TextReveal>
+            <TextReveal as="h1" modo="chars" start="top 95%" delay={0.25} data-camada="titulo">VIVECI</TextReveal>
             <p className={styles.heroSub}><TextReveal as="strong" start="top 95%" delay={0.15}>Sua visão. Nossa tecnologia.</TextReveal><span>Sites que elevam a sua marca.</span></p>
             <div className={styles.heroActions}><a ref={ctaHero} className={styles.primaryButton} href="#contato">Ver meu modelo <span>→</span></a><a className={styles.secondaryButton} href="#projetos"><i>◇</i><span>Explorar projetos</span></a></div>
           </div>
-          <p className={styles.heroDisciplines}>ESTRATÉGIA <i>/</i> DESIGN <i>/</i> TECNOLOGIA</p>
+          <p className={styles.heroDisciplines} data-camada="frente">ESTRATÉGIA <i>/</i> DESIGN <i>/</i> TECNOLOGIA</p>
           <a className={styles.heroMouse} href="#servicos" aria-label="Ir para os serviços"><i/></a>
         </motion.div>
       </div>
