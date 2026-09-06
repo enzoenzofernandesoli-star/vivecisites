@@ -111,7 +111,8 @@
 }
 
 /* Portfólio real: dez projetos selecionados */
-.projects{height:900vh}
+/* ~40vh de rolagem por projeto: antes eram ~82vh e trocar de projeto cansava */
+.projects{height:440vh}
 .projectsViewport{display:flex;align-items:center}
 .projectsTrack{height:auto;align-items:center}
 .projectCard{width:min(72vw,1120px);height:auto;min-height:0;aspect-ratio:1.63;border:0;background:transparent;box-shadow:none;cursor:default;overflow:visible;isolation:isolate}
@@ -679,8 +680,9 @@
 }
 
 /* Projetos — carrossel cinematográfico controlado pelo scroll vertical */
+/* ~40vh de rolagem por projeto: com 900vh trocar de projeto custava ~73vh */
 .projects{
-  height:900vh;
+  height:440vh;
   padding:0;
   overflow:visible;
   background:
@@ -722,7 +724,7 @@
 .site .projectsClosing{width:calc(100% - 10vw);margin:2vh auto 0;padding-top:1.6vh;border-top:1px solid rgba(var(--steel-rgb),.18);color:rgba(var(--light-rgb),.67);font-size:11px;text-align:center}
 
 @media(max-width:800px){
-  .projects{height:420vh;padding:0}
+  .projects{height:300vh;padding:0}
   .projectsSticky{position:sticky;top:0;height:100vh;padding:6vh 0 4vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
   .projectsHead{padding:0 5vw 3vh}
   .projectsHead>span{margin-bottom:.8rem;font-size:7px}
