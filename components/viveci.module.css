@@ -1081,3 +1081,15 @@
 .primaryButton:active,.secondaryButton:active,.headerCta:active,.processCta:active,.projectMeta a:active,.footerCta a:active,.projectsControls>button:active,.faqList article>button:active,.serviceObjective:active{transform:scale(.97);transition-duration:.16s}
 
 
+
+/* Barra compacta que assume a navegação depois do herói (ver StickyHeader). */
+.stickyHeader{position:fixed;z-index:40;top:0;left:0;right:0;display:flex;height:62px;padding:0 clamp(16px,3.5vw,44px);align-items:center;justify-content:space-between;gap:clamp(12px,3vw,40px);border-bottom:1px solid rgba(var(--steel-rgb),.16);background:rgba(2,7,15,.82);backdrop-filter:blur(14px);transform:translateY(-100%);opacity:0;pointer-events:none;will-change:transform,opacity}
+.stickyBrand{display:flex;width:74px;align-items:center;color:var(--ivory);flex:none}
+.stickyBrand svg{width:100%;height:auto}
+.stickyHeader nav{display:flex;gap:clamp(14px,2vw,30px);font-size:13px;color:rgba(var(--light-rgb),.76)}
+.stickyHeader nav a{transition:color .2s var(--ease-out)}
+.stickyHeader nav a:hover{color:var(--ivory)}
+.stickyCta{display:inline-flex;padding:9px 18px;align-items:center;gap:.55rem;border:1px solid rgba(var(--light-rgb),.5);border-radius:999px;color:var(--ivory);font-size:12px;white-space:nowrap;flex:none;transition:border-color .25s var(--ease-out),background .25s var(--ease-out)}
+.stickyCta:hover{border-color:var(--signal-bright);background:rgba(var(--signal-rgb),.12)}
+.stickyCta b{color:var(--signal-bright);font-weight:400}
+@media(max-width:800px){.stickyHeader{height:54px}.stickyHeader nav{display:none}.stickyCta{padding:8px 15px;font-size:11px}}

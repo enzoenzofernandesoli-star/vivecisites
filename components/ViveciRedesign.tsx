@@ -7,6 +7,10 @@ import { ContactForm } from "./ContactForm";
 import { LOGO_DRAW_DURATION, VVCLogo } from "./VVCLogo";
 import { Reveal } from "./motion/Reveal";
 import { TextReveal } from "./motion/TextReveal";
+import { useParallax } from "@/hooks/useParallax";
+import { StickyHeader } from "./motion/StickyHeader";
+import { useGSAP } from "@gsap/react";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 import styles from "./viveci.module.css";
 
 const process = [
@@ -246,12 +250,14 @@ export function ViveciRedesign() {
   const projectsSection = useRef<HTMLElement>(null);
   const projectsViewport = useRef<HTMLDivElement>(null);
   const projectsTrack = useRef<HTMLDivElement>(null);
+  const projectsBar = useRef<HTMLElement>(null);
   const [projectDragLimit, setProjectDragLimit] = useState(0);
   const [activeProject, setActiveProject] = useState(0);
   const [activeProcess, setActiveProcess] = useState(0);
   const [activeFaq, setActiveFaq] = useState<number | null>(2);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const heroPhoto = useParallax<HTMLDivElement>({ amount: -10 });
   const isMobile = useIsMobile();
   const whatsappVisible = prefersReducedMotion || showWhatsApp;
 
@@ -267,19 +273,12 @@ export function ViveciRedesign() {
   }, []);
 
   const introProgress = usePinnedProgress(intro);
-  const projectsScrollProgress = usePinnedProgress(projectsSection);
-  // Parallax da foto do herói enquanto a primeira tela sai de cena.
-  const imageY = useTransform(introProgress, [0, 1], [0, -46]);
-  const smoothImageY = useSpring(imageY, { stiffness: 76, damping: 24 });
   /**
    * Desktop: o trilho anda de projeto em projeto. O scroll escolhe o card e a
    * mola leva o trilho até a posição exata dele — assim nunca para no meio de
    * dois projetos, e o card ativo fica sempre centralizado.
    */
-  const projectXTarget = useMotionValue(0);
-  const projectX = useSpring(projectXTarget, { stiffness: 130, damping: 24, mass: .55 });
-  const projectProgressTarget = useMotionValue(.16);
-  const projectProgress = useSpring(projectProgressTarget, { stiffness: 130, damping: 24, mass: .55 });
+
 
   /**
    * Abertura: a logo se desenha sozinha e entrega o herói. Não depende de
@@ -324,6 +323,51 @@ export function ViveciRedesign() {
     if (introPhase === "done") setShowWhatsApp(true);
   }, [introPhase]);
 
+
+  /**
+   * Desktop: o scroll da seção travada (sticky no CSS) vira posição do trilho.
+   * `snap` faz assentar centralizado em um projeto — nunca entre dois.
+   * Abaixo de 768px nada disso liga: lá o carrossel é scroll-snap nativo.
+   */
+  useGSAP(() => {
+    const section = projectsSection.current;
+    const track = projectsTrack.current;
+    if (!section || !track) return;
+
+    const mm = gsap.matchMedia();
+    mm.add("(min-width: 769px) and (prefers-reduced-motion: no-preference)", () => {
+      const last = projects.length - 1;
+
+      const offsetOf = (index: number) => {
+        const viewport = projectsViewport.current;
+        const card = track.children[index] as HTMLElement | undefined;
+        if (!viewport || !card) return 0;
+        return card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
+      };
+
+      const st = ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0.6,
+        snap: { snapTo: 1 / last, duration: 0.35, ease: "power2.inOut" },
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const index = Math.max(0, Math.min(last, Math.round(self.progress * last)));
+          gsap.set(track, { x: -offsetOf(index) });
+          if (projectsBar.current) {
+            gsap.set(projectsBar.current, { scaleX: 0.16 + 0.84 * (last ? index / last : 1) });
+          }
+          setActiveProject((current) => (current === index ? current : index));
+        },
+      });
+
+      return () => st.kill();
+    });
+
+    return () => mm.revert();
+  }, { dependencies: [] });
+
   /** Deslocamento que deixa cada card centralizado no viewport. */
   const centeredOffset = (index: number) => {
     const viewport = projectsViewport.current;
@@ -333,16 +377,6 @@ export function ViveciRedesign() {
     return card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
   };
 
-  // No desktop o projeto ativo vem do progresso do scroll travado.
-  // No celular quem manda é a posição do carrossel nativo (efeito abaixo).
-  useMotionValueEvent(projectsScrollProgress, "change", (latest) => {
-    if (isMobile) return;
-    const last = projects.length - 1;
-    const nextProject = Math.max(0, Math.min(last, Math.round(latest * last)));
-    setActiveProject((current) => current === nextProject ? current : nextProject);
-    projectXTarget.set(-centeredOffset(nextProject));
-    projectProgressTarget.set(.16 + (1 - .16) * (last ? nextProject / last : 1));
-  });
 
   /**
    * Índice do card mais próximo do centro do carrossel.
@@ -387,8 +421,8 @@ export function ViveciRedesign() {
       if (!viewport || !track) return;
       const limit = Math.max(0, track.scrollWidth - viewport.clientWidth);
       setProjectDragLimit(limit);
-      // Recentraliza o card ativo quando a largura muda.
-      if (!isMobile) projectXTarget.set(-centeredOffset(activeProject));
+      // Quem recentraliza no desktop agora e o ScrollTrigger (invalidateOnRefresh).
+      if (!isMobile) ScrollTrigger.refresh();
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -424,6 +458,7 @@ export function ViveciRedesign() {
   };
 
   return <main className={styles.site}>
+    <StickyHeader />
     <section ref={intro} className={styles.intro} id="inicio">
       <div className={styles.introSticky}>
         <AnimatePresence>
@@ -453,9 +488,9 @@ export function ViveciRedesign() {
             <a className={styles.brand} href="#inicio" aria-label="Viveci — início"><VVCLogo/><i/><b>VIVECI</b></a>
             <nav aria-label="Navegação principal"><a href="#inicio">Início</a><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a className={styles.headerCta} href="#contato" aria-label="Iniciar projeto"><span>Iniciar projeto</span><b>→</b></a></nav>
           </header>
-          <motion.div className={styles.heroPhoto} style={{ y: smoothImageY }}>
+          <div ref={heroPhoto} className={styles.heroPhoto}>
             <Image src="/images/vvc-android-hero.png" fill preload quality={100} sizes="100vw" alt="Android de acabamento preto e azul representando a tecnologia da Viveci" />
-          </motion.div>
+          </div>
           <div className={styles.heroShade}/>
           <div className={styles.heroCopy}>
             <h1>VIVECI</h1>
@@ -485,7 +520,7 @@ export function ViveciRedesign() {
           <span>Projetos</span><h2>Experiências feitas para impressionar.</h2><p>Explore o que podemos criar para o seu negócio.</p>
         </Reveal>
         <div ref={projectsViewport} className={styles.projectsViewport} role="region" aria-label={isMobile ? "Galeria de projetos — arraste para o lado" : "Galeria horizontal de projetos controlada pelo scroll"}>
-          <motion.div ref={projectsTrack} className={styles.projectsTrack} style={{ x: isMobile ? 0 : projectX }}>
+          <div ref={projectsTrack} className={styles.projectsTrack}>
             {projects.map((project, index) => <motion.article
               className={styles.projectCard}
               data-active={activeProject === index}
@@ -505,7 +540,7 @@ export function ViveciRedesign() {
                 </div>
               </div>
             </motion.article>)}
-          </motion.div>
+          </div>
         </div>
         <motion.div className={styles.projectMeta} key={projects[activeProject].area} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .26, ease: [.22, 1, .36, 1] }}>
           <span>PROJETO SELECIONADO / {String(activeProject + 1).padStart(2, "0")}</span>
@@ -515,7 +550,7 @@ export function ViveciRedesign() {
         </motion.div>
         <div className={styles.projectsControls}>
           <button type="button" onClick={() => moveProjects(-1)} aria-label="Projeto anterior">←</button>
-          <div className={styles.projectsProgress}><motion.i style={{ scaleX: projectProgress }}/>{projects.map((project,index)=><button type="button" className={activeProject === index ? styles.activeProjectDot : ""} onClick={() => goToProject(index)} aria-label={`Ver projeto ${project.area}`} key={project.area}/>)}</div>
+          <div className={styles.projectsProgress}><i ref={projectsBar} />{projects.map((project,index)=><button type="button" className={activeProject === index ? styles.activeProjectDot : ""} onClick={() => goToProject(index)} aria-label={`Ver projeto ${project.area}`} key={project.area}/>)}</div>
           <button type="button" onClick={() => moveProjects(1)} aria-label="Próximo projeto">→</button>
         </div>
         <p className={styles.projectsClosing}>Seu negócio, em uma nova perspectiva.</p>
