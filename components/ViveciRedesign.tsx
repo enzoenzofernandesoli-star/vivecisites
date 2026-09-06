@@ -10,6 +10,7 @@ import { TextReveal } from "./motion/TextReveal";
 import { useParallax } from "@/hooks/useParallax";
 import { StickyHeader } from "./motion/StickyHeader";
 import { Cursor } from "./motion/Cursor";
+import { DistortionImage } from "./motion/DistortionImage";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
@@ -541,7 +542,12 @@ export function ViveciRedesign() {
             >
               <div className={styles.projectShell}>
                 <div className={styles.projectImage}>
-                  <Image src={project.image} fill quality={100} sizes="(max-width: 800px) 84vw, (max-width: 1600px) 72vw, 1120px" alt={`Página inicial do projeto ${project.area}`} style={{ objectPosition: project.position }} draggable={false}/>
+                  <DistortionImage
+                    src={project.image}
+                    alt={`Página inicial do projeto ${project.area}`}
+                    sizes="(max-width: 800px) 84vw, (max-width: 1600px) 72vw, 1120px"
+                    objectPosition={project.position}
+                  />
                 </div>
               </div>
             </motion.article>)}
