@@ -410,7 +410,8 @@ export function ViveciRedesign() {
     if (prefersReducedMotion) { setIntroPhase("done"); return; }
     // A abertura sempre começa do topo, mesmo se o navegador restaurar o scroll.
     if (!window.location.hash) window.scrollTo(0, 0);
-    const hold = (LOGO_DRAW_DURATION + .34) * 1000;
+    // espera o traçado, mais o lettering e o acento que entram depois dele
+    const hold = (LOGO_DRAW_DURATION + .92) * 1000;
     const exit = 620;
     const toExit = setTimeout(() => setIntroPhase("exit"), hold);
     const toDone = setTimeout(() => setIntroPhase("done"), hold + exit);
@@ -621,6 +622,23 @@ export function ViveciRedesign() {
               exit={{ opacity: 0, scale: .94, transition: { duration: .55, ease: [.22, 1, .36, 1] } }}
             >
               <VVCLogo animated />
+              {/* A logo não é só o monograma: embaixo dele vêm o lettering
+                  espaçado e o traço de acento. Entram depois que a caneta
+                  termina, na ordem em que a marca é lida. */}
+              <motion.span
+                className={styles.introWordmark}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: .62, delay: LOGO_DRAW_DURATION - .08, ease: [.22, 1, .36, 1] }}
+              >
+                DIGITAL STUDIO
+              </motion.span>
+              <motion.i
+                className={styles.introRule}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: .46, delay: LOGO_DRAW_DURATION + .2, ease: [.22, 1, .36, 1] }}
+              />
             </motion.div>
           )}
         </AnimatePresence>
