@@ -1080,8 +1080,4 @@
 /* Feedback de pressao: o controle cede sob o dedo/cursor. */
 .primaryButton:active,.secondaryButton:active,.headerCta:active,.processCta:active,.projectMeta a:active,.footerCta a:active,.projectsControls>button:active,.faqList article>button:active,.serviceObjective:active{transform:scale(.97);transition-duration:.16s}
 
-/* Entrada padrão das seções: sobe e aparece ao alcançar a tela.
-   `--i` escalona um grupo em 55ms por item (decorativo, nunca bloqueia clique). */
-.reveal{opacity:0;transform:translateY(18px);transition:opacity .5s var(--ease-out),transform .5s var(--ease-out);transition-delay:calc(var(--i,0) * 55ms)}
-.reveal[data-shown="true"]{opacity:1;transform:none}
-@media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none;transition:none}}
+

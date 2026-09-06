@@ -5,6 +5,8 @@ import { AnimatePresence, motion, useInView, useMotionValue, useMotionValueEvent
 import { RefObject, useEffect, useRef, useState } from "react";
 import { ContactForm } from "./ContactForm";
 import { LOGO_DRAW_DURATION, VVCLogo } from "./VVCLogo";
+import { Reveal } from "./motion/Reveal";
+import { TextReveal } from "./motion/TextReveal";
 import styles from "./viveci.module.css";
 
 const process = [
@@ -72,40 +74,6 @@ function ProcessIcon({ name }: { name: (typeof process)[number]["icon"] }) {
         <path d="M7.5 22.5c2.4-1.6 5.4-2.5 8.5-2.5s6.1.9 8.5 2.5"/>
       </>}
     </svg>
-  );
-}
-
-/**
- * Entrada padrão das seções: o elemento sobe e aparece quando alcança a tela.
- * Substitui a tag original (não embrulha), para não quebrar grids.
- * O `index` escalona a entrada de um grupo em 55ms por item.
- */
-function Reveal({
-  as: Tag = "div",
-  index = 0,
-  className = "",
-  children,
-  ...rest
-}: {
-  as?: "div" | "article" | "li" | "section";
-  index?: number;
-  className?: string;
-  children: React.ReactNode;
-} & React.HTMLAttributes<HTMLElement>) {
-  const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: true, amount: .25 });
-  const reduced = usePrefersReducedMotion();
-  return (
-    <Tag
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ref={ref as any}
-      className={`${styles.reveal} ${className}`.trim()}
-      data-shown={reduced || inView ? "true" : "false"}
-      style={{ ["--i" as string]: index }}
-      {...rest}
-    >
-      {children}
-    </Tag>
   );
 }
 
@@ -491,7 +459,7 @@ export function ViveciRedesign() {
           <div className={styles.heroShade}/>
           <div className={styles.heroCopy}>
             <h1>VIVECI</h1>
-            <p className={styles.heroSub}><strong>Sua visão. Nossa tecnologia.</strong><span>Sites que elevam a sua marca.</span></p>
+            <p className={styles.heroSub}><TextReveal as="strong" start="top 95%" delay={0.15}>Sua visão. Nossa tecnologia.</TextReveal><span>Sites que elevam a sua marca.</span></p>
             <div className={styles.heroActions}><a className={styles.primaryButton} href="#contato">Ver meu modelo <span>→</span></a><a className={styles.secondaryButton} href="#projetos"><i>◇</i><span>Explorar projetos</span></a></div>
           </div>
           <p className={styles.heroDisciplines}>ESTRATÉGIA <i>/</i> DESIGN <i>/</i> TECNOLOGIA</p>
@@ -501,7 +469,7 @@ export function ViveciRedesign() {
     </section>
 
     <section className={styles.services} id="servicos">
-      <Reveal className={styles.servicesIntro}><span>Nossos serviços</span><h2>O que a Viveci faz.</h2><p>Quatro frentes. Uma presença digital completa.</p></Reveal>
+      <div className={styles.servicesIntro}><span>Nossos serviços</span><TextReveal as="h2">O que a Viveci faz.</TextReveal><p>Quatro frentes. Uma presença digital completa.</p></div>
       <div className={styles.serviceGrid}>{serviceObjectives.map((objective, index)=><Reveal as="article" index={index} className={styles.serviceObjective} key={objective.title}>
         <div className={styles.serviceIcon}><ServiceIcon type={objective.icon}/></div>
         <h3>{objective.title}</h3>
@@ -554,7 +522,7 @@ export function ViveciRedesign() {
       </div>
     </section>
 
-    <section className={styles.processSection} id="processo" data-probe-target>
+    <section className={styles.processSection} id="processo">
       <Reveal className={styles.processHeading}>
         <span>Como funciona</span>
         <h2>Um processo claro. Sem surpresas.</h2>
