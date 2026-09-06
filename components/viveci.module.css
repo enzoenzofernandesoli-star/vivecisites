@@ -255,6 +255,12 @@
 .intro,.introSticky{background:var(--navy)}
 .introMark{filter:drop-shadow(0 14px 36px rgba(2,12,24,.34))}
 .introMark svg{color:var(--ivory)}
+/* Lettering e acento da logo. O acento é dourado, e não vermelho como no
+   arquivo original: no site o dourado é a cor da marca e o vermelho ficou
+   reservado para ação (botões, alertas). */
+.introWordmark{margin-top:clamp(14px,1.7vw,26px);color:rgba(var(--light-rgb),.88);font-family:var(--font-sans);font-size:clamp(8px,.72vw,11px);font-weight:400;letter-spacing:.62em;text-indent:.62em;text-transform:uppercase;white-space:nowrap}
+.introRule{display:block;width:clamp(52px,4.6vw,74px);height:2px;margin-top:clamp(13px,1.5vw,21px);background:var(--gold);transform-origin:center}
+@media(max-width:800px){.introWordmark{font-size:9px;letter-spacing:.46em;text-indent:.46em}.introRule{width:58px;margin-top:16px}}
 
 
 
