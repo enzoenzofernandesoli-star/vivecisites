@@ -49,6 +49,14 @@ with sync_playwright() as p:
     page.mouse.move(0,0)
     page.wait_for_timeout(800)
     assert first.locator('[data-pronto="true"]').count()==0
+    contato=page.locator("#contato")
+    contato.scroll_into_view_if_needed()
+    page.wait_for_timeout(1200)
+    robo_contato=contato.locator("img")
+    assert robo_contato.count()==1
+    assert robo_contato.evaluate("el=>getComputedStyle(el).transform.startsWith('matrix(-1, 0, 0, 1')")
+    assert robo_contato.evaluate("el=>getComputedStyle(el).objectPosition") == "100% 50%"
+    contato.screenshot(path=str(out/"contato-robo-1440.png"))
     page.emulate_media(reduced_motion="reduce")
     page.wait_for_timeout(600)
     assert page.locator('[data-depth-plane]').first.evaluate("el=>getComputedStyle(el).transform") == "none"
@@ -64,6 +72,12 @@ with sync_playwright() as p:
         page.wait_for_timeout(800)
         assert page.locator('aside[aria-label="Guia 3D da página"]').count()==0
         assert page.locator('img[alt*="Android de acabamento preto"]').count()==1
+        contato=page.locator("#contato")
+        contato.scroll_into_view_if_needed()
+        page.wait_for_timeout(700)
+        robo_contato=contato.locator("img")
+        assert robo_contato.evaluate("el=>getComputedStyle(el).transform.startsWith('matrix(-1, 0, 0, 1')")
+        contato.screenshot(path=str(out/f"contato-robo-{width}.png"))
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
         page.screenshot(path=str(out/f"original-motion-{width}.png"))
         results.append({"width":width,"scroll_robot_removed":True,"hero_robot_preserved":True,"no_overflow":True})
