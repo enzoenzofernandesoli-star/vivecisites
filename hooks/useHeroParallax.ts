@@ -60,7 +60,7 @@ export function useHeroParallax(scope: RefObject<HTMLElement | null>) {
           },
         });
 
-        camadas.forEach(({ sel, y, fade }, i) => {
+        camadas.forEach(({ sel, y, fade }) => {
           const alvos = raiz.querySelectorAll(sel);
           if (!alvos.length) return;
           tl.to(alvos, { yPercent: y, duration: 1 }, 0);

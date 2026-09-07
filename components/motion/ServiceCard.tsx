@@ -27,7 +27,8 @@ export function ServiceCard({
     () => {
       const el = ref.current;
       if (!el) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
 
       const icon = el.querySelector(`.${styles.serviceIcon}`);
       const resto = el.querySelectorAll("h3, p, a");
@@ -35,7 +36,7 @@ export function ServiceCard({
 
       const tl = gsap.timeline({
         defaults: { ease: "power3.out" },
-        scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
+        scrollTrigger: { trigger: el, start: "top 88%", once: true },
       });
 
       tl.from(el, { opacity: 0, y: 34, duration: 0.65, delay: atraso })
@@ -43,6 +44,8 @@ export function ServiceCard({
         .from(resto, { opacity: 0, y: 14, duration: 0.45, stagger: 0.07 }, "-=0.28");
 
       return () => { tl.scrollTrigger?.kill(); tl.kill(); };
+      });
+      return () => mm.revert();
     },
     { scope: ref, dependencies: [index] }
   );

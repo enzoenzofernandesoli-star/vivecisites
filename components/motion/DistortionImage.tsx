@@ -1,202 +1,131 @@
 "use client";
-
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import styles from "../viveci.module.css";
 
-const VERT = `
+const vertex = `
 attribute vec2 uv;
 attribute vec2 position;
 varying vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position, 0.0, 1.0);
-}`;
-
-const FRAG = `
+void main(){vUv=uv;gl_Position=vec4(position,0.0,1.0);}
+`;
+const fragment = `
 precision highp float;
 uniform sampler2D tMap;
-uniform sampler2D tDisp;
-uniform float uProgress;
+uniform vec2 uScale;
+uniform vec2 uOffset;
+uniform vec2 uMouse;
+uniform float uStrength;
+uniform float uTime;
 varying vec2 vUv;
-void main() {
-  vec4 disp = texture2D(tDisp, vUv);
-  vec2 uv = vUv + (disp.rg - 0.5) * uProgress * 0.15;
-  gl_FragColor = texture2D(tMap, uv);
-}`;
+void main(){
+  vec2 delta=vUv-uMouse;
+  float distanceToPointer=length(delta);
+  float envelope=1.0-smoothstep(0.0,0.48,distanceToPointer);
+  float wave=sin(distanceToPointer*28.0-uTime*3.2);
+  vec2 refraction=normalize(delta+vec2(0.0001))*wave*envelope*uStrength*0.009;
+  vec2 uv=clamp((vUv+refraction)*uScale+uOffset,vec2(0.001),vec2(0.999));
+  gl_FragColor=texture2D(tMap,uv);
+}
+`;
 
-/**
- * Thumb de projeto com distorção no hover, via OGL.
- *
- * Regras que este componente não quebra:
- * - `ogl` entra por import dinâmico: nunca no bundle inicial
- * - só em telas grandes e ponteiro fino
- * - o contexto WebGL só é criado quando o card entra na viewport, e é
- *   destruído ao sair — no carrossel há 12 cards e o navegador limita o
- *   número de contextos simultâneos
- * - se qualquer etapa falhar, a <Image> continua visível por baixo
- */
-export function DistortionImage({
-  src,
-  alt,
-  sizes,
-  objectPosition,
-}: {
-  src: string;
-  alt: string;
-  sizes: string;
-  objectPosition?: string;
-}) {
-  const host = useRef<HTMLDivElement>(null);
-  const [canvasPronto, setCanvasPronto] = useState(false);
-
-  useEffect(() => {
-    const el = host.current;
-    if (!el) return;
-
-    const apto =
-      window.matchMedia("(min-width: 1024px)").matches &&
-      window.matchMedia("(pointer: fine)").matches &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!apto) return;
-
-    let vivo = true;
-    let desmontar: (() => void) | null = null;
-
-    const montar = async () => {
-      try {
-        const { Renderer, Camera, Transform, Program, Mesh, Triangle, Texture } =
-          await import("ogl");
-        if (!vivo) return;
-
-        const renderer = new Renderer({
-          dpr: Math.min(window.devicePixelRatio, 2),
-          alpha: true,
-          antialias: false,
+/** Refração localizada: preserva o recorte da imagem e renderiza só enquanto assenta. */
+export function DistortionImage({src,alt,sizes,objectPosition}:{
+  src:string;alt:string;sizes:string;objectPosition?:string;
+}){
+  const host=useRef<HTMLDivElement>(null);
+  useEffect(()=>{
+    const el=host.current;
+    if(!el)return;
+    const query=window.matchMedia("(min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
+    let generation=0;
+    let cleanup:(()=>void)|undefined;
+    let visible=false;
+    let disposed=false;
+    const destroy=()=>{generation++;cleanup?.();cleanup=undefined;el.setAttribute("data-pronto","false");};
+    const setup=async()=>{
+      const token=++generation;
+      let contextLost=false;
+      const valid=()=>!disposed&&!contextLost&&token===generation&&visible&&query.matches;
+      try{
+        const {Renderer,Program,Mesh,Triangle,Texture}=await import("ogl");
+        if(!valid())return;
+        const img=new window.Image();
+        img.src=el.querySelector("img")?.currentSrc||src;
+        await img.decode();
+        if(!valid())return;
+        const renderer=new Renderer({dpr:Math.min(devicePixelRatio,1.5),alpha:true,antialias:false});
+        const gl=renderer.gl;
+        const canvas=gl.canvas as HTMLCanvasElement;
+        const releases:(()=>void)[]=[];
+        cleanup=()=>{releases.reverse().forEach(release=>release());canvas.remove();gl.getExtension("WEBGL_lose_context")?.loseContext();};
+        canvas.className=styles.distortCanvas;
+        canvas.setAttribute("aria-hidden","true");
+        const texture=new Texture(gl,{image:img,generateMipmaps:false});
+        releases.push(()=>gl.deleteTexture(texture.texture));
+        const scale=[1,1],offset=[0,0],mouse=[.5,.5];
+        const program=new Program(gl,{vertex,fragment,depthTest:false,depthWrite:false,uniforms:{
+          tMap:{value:texture},uScale:{value:scale},uOffset:{value:offset},uMouse:{value:mouse},uStrength:{value:0},uTime:{value:0}
+        }});
+        releases.push(()=>program.remove());
+        const geometry=new Triangle(gl);
+        releases.push(()=>geometry.remove());
+        const mesh=new Mesh(gl,{geometry,program});
+        el.appendChild(canvas);
+        let frame=0;
+        let strength=0;
+        let last=0;
+        let hovered=false;
+        let rect=el.getBoundingClientRect();
+        const draw=(now:number)=>{
+          frame=0;
+          if(!valid()||document.hidden)return;
+          const dt=Math.min(40,now-(last||now-16.67))/16.67;
+          last=now;
+          strength*=Math.pow(.93,dt);
+          program.uniforms.uStrength.value=strength;
+          program.uniforms.uTime.value=now*.001;
+          renderer.render({scene:mesh});
+          if(strength>.002)frame=requestAnimationFrame(draw);
+        };
+        const request=()=>{if(!frame&&!document.hidden&&valid())frame=requestAnimationFrame(draw);};
+        const measure=()=>{
+          rect=el.getBoundingClientRect();
+          if(!rect.width||!rect.height)return;
+          renderer.setSize(rect.width,rect.height);
+          const ratio=(rect.width/rect.height)/(img.naturalWidth/img.naturalHeight);
+          scale[0]=Math.min(1,ratio);scale[1]=Math.min(1,1/ratio);
+          const top=objectPosition?.includes("top");
+          offset[0]=(1-scale[0])/2;offset[1]=(1-scale[1])*(top?1:.5);
+          request();
+        };
+        const enter=()=>{hovered=true;rect=el.getBoundingClientRect();strength=.65;el.setAttribute("data-pronto","true");request();};
+        const move=(event:PointerEvent)=>{
+          mouse[0]=Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width));
+          mouse[1]=1-Math.max(0,Math.min(1,(event.clientY-rect.top)/rect.height));
+          strength=1;request();
+        };
+        const leave=()=>{hovered=false;el.setAttribute("data-pronto","false");strength=.15;request();};
+        const visibility=()=>{cancelAnimationFrame(frame);frame=0;last=0;if(document.hidden)el.setAttribute("data-pronto","false");else if(hovered){el.setAttribute("data-pronto","true");request();}};
+        const lost=(event:Event)=>{event.preventDefault();contextLost=true;leave();cancelAnimationFrame(frame);frame=0;};
+        const ro=new ResizeObserver(measure);
+        releases.push(()=>{
+          ro.disconnect();cancelAnimationFrame(frame);
+          el.removeEventListener("pointerenter",enter);el.removeEventListener("pointermove",move);el.removeEventListener("pointerleave",leave);
+          document.removeEventListener("visibilitychange",visibility);window.removeEventListener("blur",leave);canvas.removeEventListener("webglcontextlost",lost);
         });
-        const gl = renderer.gl;
-        // contexto perdido ou negado: cai para a <Image>
-        if (!gl) return;
-
-        gl.canvas.className = styles.distortCanvas;
-        el.appendChild(gl.canvas);
-
-        new Camera(gl);
-        new Transform();
-
-        const carregar = (url: string) => {
-          const tex = new Texture(gl, { generateMipmaps: false });
-          const img = new window.Image();
-          img.crossOrigin = "anonymous";
-          img.src = url;
-          img.onload = () => { tex.image = img; };
-          return tex;
-        };
-
-        const program = new Program(gl, {
-          vertex: VERT,
-          fragment: FRAG,
-          uniforms: {
-            tMap: { value: carregar(src) },
-            tDisp: { value: carregar("/images/displacement.png") },
-            uProgress: { value: 0 },
-          },
-        });
-
-        const mesh = new Mesh(gl, { geometry: new Triangle(gl), program });
-
-        const medir = () => {
-          const r = el.getBoundingClientRect();
-          renderer.setSize(r.width, r.height);
-        };
-        medir();
-        const ro = new ResizeObserver(medir);
-        ro.observe(el);
-
-        let raf = 0;
-        let rodando = false;
-        const desenhar = () => {
-          renderer.render({ scene: mesh });
-          raf = requestAnimationFrame(desenhar);
-        };
-        const ligar = () => { if (!rodando) { rodando = true; desenhar(); } };
-        const desligar = () => { rodando = false; cancelAnimationFrame(raf); };
-
-        // fora da viewport o loop para; a destruicao do contexto fica a
-        // cargo do gatilho externo
-        const io = new IntersectionObserver(
-          ([e]) => (e.isIntersecting ? ligar() : desligar()),
-          { rootMargin: "200px" }
-        );
-        io.observe(el);
-
-        const { gsap } = await import("@/lib/gsap");
-        if (!vivo) return;
-        const alvo = program.uniforms.uProgress;
-        const entrar = () => gsap.to(alvo, { value: 1, duration: 0.6, ease: "power2.out" });
-        const sair = () => gsap.to(alvo, { value: 0, duration: 0.8, ease: "power2.out" });
-        el.addEventListener("pointerenter", entrar);
-        el.addEventListener("pointerleave", sair);
-
-        setCanvasPronto(true);
-
-        desmontar = () => {
-          io.disconnect();
-          ro.disconnect();
-          desligar();
-          el.removeEventListener("pointerenter", entrar);
-          el.removeEventListener("pointerleave", sair);
-          gsap.killTweensOf(alvo);
-          gl.canvas.remove();
-          gl.getExtension("WEBGL_lose_context")?.loseContext();
-        };
-      } catch {
-        // sem WebGL, sem OGL, sem shader: a <Image> segue no lugar
-      }
+        el.addEventListener("pointerenter",enter);el.addEventListener("pointermove",move);el.addEventListener("pointerleave",leave);
+        document.addEventListener("visibilitychange",visibility);window.addEventListener("blur",leave);canvas.addEventListener("webglcontextlost",lost);
+        ro.observe(el);measure();
+        if(el.matches(":hover"))enter();
+      }catch{if(token===generation)destroy();}
     };
-
-    /**
-     * Monta ao aproximar e destrói ao afastar. Sem destruir, o carrossel de
-     * 12 cards acumula 12 contextos WebGL vivos — o navegador permite ~16,
-     * e cada um segura memória de GPU.
-     *
-     * A margem larga e o atraso na saída evitam ficar criando e destruindo
-     * a cada micro-scroll.
-     */
-    let montado = false;
-    let saida: ReturnType<typeof setTimeout> | null = null;
-
-    const gatilho = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          if (saida) { clearTimeout(saida); saida = null; }
-          if (!montado) { montado = true; montar(); }
-        } else if (montado && !saida) {
-          saida = setTimeout(() => {
-            saida = null;
-            montado = false;
-            desmontar?.();
-            desmontar = null;
-            setCanvasPronto(false);
-          }, 600);
-        }
-      },
-      { rootMargin: "400px" }
-    );
-    gatilho.observe(el);
-
-    return () => {
-      vivo = false;
-      if (saida) clearTimeout(saida);
-      gatilho.disconnect();
-      desmontar?.();
-      setCanvasPronto(false);
-    };
-  }, [src]);
-
-  return (
-    <div ref={host} className={styles.distortHost} data-pronto={canvasPronto ? "true" : "false"}>
-      <Image src={src} fill quality={100} sizes={sizes} alt={alt} style={{ objectPosition }} draggable={false} />
-    </div>
-  );
+    const sync=()=>{destroy();if(visible&&query.matches&&!document.hidden)void setup();};
+    const resume=()=>{if(!document.hidden&&!cleanup)sync();};
+    const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;sync();},{threshold:.1});
+    observer.observe(el);query.addEventListener("change",sync);
+    document.addEventListener("visibilitychange",resume);
+    return()=>{disposed=true;observer.disconnect();query.removeEventListener("change",sync);document.removeEventListener("visibilitychange",resume);destroy();};
+  },[src,objectPosition]);
+  return <div ref={host} className={styles.distortHost} data-pronto="false"><Image src={src} fill quality={100} sizes={sizes} alt={alt} style={{objectPosition}} draggable={false}/></div>;
 }

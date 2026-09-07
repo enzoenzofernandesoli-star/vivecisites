@@ -1,66 +1,37 @@
 "use client";
-
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, SplitText } from "@/lib/gsap";
 
-/**
- * Reveal de texto palavra por palavra, com máscara por linha.
- *
- * O split roda depois de document.fonts.ready: se rodar antes, as linhas
- * quebram na métrica da fonte de fallback e ficam no lugar errado.
- */
 export function useTextReveal<T extends HTMLElement>(options?: {
-  start?: string;
-  stagger?: number;
-  duration?: number;
-  delay?: number;
-  /** "words" (padrão) para frases; "chars" para wordmark, letra a letra. */
-  modo?: "words" | "chars";
+  start?: string; stagger?: number; duration?: number; delay?: number; modo?: "words" | "chars";
 }) {
   const ref = useRef<T>(null);
-
-  useGSAP(
-    () => {
-      const el = ref.current;
-      if (!el) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
+  useGSAP(() => {
+    const el = ref.current;
+    if (!el || el.querySelector("a, button")) return;
+    const mm = gsap.matchMedia();
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
       let split: SplitText | null = null;
+      let tween: gsap.core.Tween | null = null;
       let cancelled = false;
-
       document.fonts.ready.then(() => {
-        if (cancelled || !ref.current) return;
-
-        const porLetra = options?.modo === "chars";
-        split = new SplitText(el, {
-          type: porLetra ? "chars" : "lines,words",
-          linesClass: "reveal-line",
+        if (cancelled) return;
+        split = SplitText.create(el, {
+          type: options?.modo === "chars" ? "chars" : "words",
+          aria: "auto",
         });
-        const alvos = porLetra ? split.chars : split.words;
-
-        gsap.from(alvos, {
-          yPercent: 115,
-          duration: options?.duration ?? 1,
-          ease: "expo.out",
-          stagger: options?.stagger ?? 0.025,
+        const targets = options?.modo === "chars" ? split.chars : split.words;
+        tween = gsap.from(targets, {
+          y: 18, duration: options?.duration ?? .6, ease: "power3.out",
+          stagger: { amount: Math.min(.3, targets.length * (options?.stagger ?? .025)) },
           delay: options?.delay ?? 0,
-          scrollTrigger: {
-            trigger: el,
-            start: options?.start ?? "top 80%",
-            toggleActions: "play none none reverse",
-          },
+          scrollTrigger: { trigger: el, start: options?.start ?? "top 90%", once: true },
         });
       });
-
-      // SplitText reescreve o DOM do texto: sem revert, cada re-render acumula spans.
-      return () => {
-        cancelled = true;
-        split?.revert();
-      };
-    },
-    { scope: ref }
-  );
-
+      return () => { cancelled = true; tween?.scrollTrigger?.kill(); tween?.kill(); split?.revert(); };
+    });
+    return () => mm.revert();
+  }, { scope: ref });
   return ref;
 }

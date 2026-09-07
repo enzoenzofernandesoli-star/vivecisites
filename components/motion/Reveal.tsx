@@ -27,13 +27,11 @@ export function Reveal({
     () => {
       const el = ref.current;
       if (!el) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        gsap.set(el, { opacity: 1, y: 0 });
-        return;
-      }
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
       gsap.from(el, {
         opacity: 0,
-        y: 40,
+        y: 20,
         duration: 0.8,
         ease: "power3.out",
         delay: index * 0.055,
@@ -41,9 +39,11 @@ export function Reveal({
           trigger: el,
           start: "top 85%",
           // desfaz ao subir e refaz ao descer de novo
-          toggleActions: "play none none reverse",
+          once: true,
         },
       });
+      });
+      return () => mm.revert();
     },
     { scope: ref, dependencies: [index] }
   );

@@ -28,7 +28,8 @@ export function Stagger({
     () => {
       const el = ref.current;
       if (!el) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
       const filhos = Array.from(el.children);
       if (!filhos.length) return;
 
@@ -38,8 +39,10 @@ export function Stagger({
         duration: 0.6,
         ease: "power3.out",
         stagger: intervalo,
-        scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
+        scrollTrigger: { trigger: el, start: "top 88%", once: true },
       });
+      });
+      return () => mm.revert();
     },
     { scope: ref }
   );

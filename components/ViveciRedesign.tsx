@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { AnimatePresence, motion, useInView, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ContactForm } from "./ContactForm";
 import { LOGO_DRAW_DURATION, VVCLogo } from "./VVCLogo";
 import { Reveal } from "./motion/Reveal";
@@ -10,6 +10,7 @@ import { TextReveal } from "./motion/TextReveal";
 import { Stagger } from "./motion/Stagger";
 import { ServiceCard } from "./motion/ServiceCard";
 import { useHeroParallax } from "@/hooks/useHeroParallax";
+import { useDepthMotion } from "@/hooks/useDepthMotion";
 import { StickyHeader } from "./motion/StickyHeader";
 import { Cursor } from "./motion/Cursor";
 import { DistortionImage } from "./motion/DistortionImage";
@@ -312,26 +313,6 @@ const projects = [
   { area: "Imobilis Momentum", image: "/images/projects/imobilis-momentum.png", position: "top center" },
 ] as const;
 
-function usePinnedProgress(ref: RefObject<HTMLElement | null>) {
-  const progress = useMotionValue(0);
-  useEffect(() => {
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const el = ref.current;
-      if (!el) return;
-      const total = Math.max(1, el.offsetHeight - window.innerHeight);
-      progress.set(Math.max(0, Math.min(1, -el.getBoundingClientRect().top / total)));
-    };
-    const request = () => { if (!raf) raf = requestAnimationFrame(update); };
-    update();
-    window.addEventListener("scroll", request, { passive: true });
-    window.addEventListener("resize", request);
-    return () => { window.removeEventListener("scroll", request); window.removeEventListener("resize", request); if (raf) cancelAnimationFrame(raf); };
-  }, [progress, ref]);
-  return progress;
-}
-
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -344,35 +325,21 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-/** No celular a galeria de projetos vira scroll horizontal nativo com snap. */
-function useIsMobile() {
-  const [mobile, setMobile] = useState(false);
-  useEffect(() => {
-    const query = window.matchMedia("(max-width: 800px)");
-    const update = () => setMobile(query.matches);
-    const frame = requestAnimationFrame(update);
-    query.addEventListener("change", update);
-    return () => { cancelAnimationFrame(frame); query.removeEventListener("change", update); };
-  }, []);
-  return mobile;
-}
-
 export function ViveciRedesign() {
+  const depthRoot = useRef<HTMLElement>(null);
+  useDepthMotion(depthRoot);
   const intro = useRef<HTMLElement>(null);
   const projectsSection = useRef<HTMLElement>(null);
   const projectsViewport = useRef<HTMLDivElement>(null);
   const projectsTrack = useRef<HTMLDivElement>(null);
   const projectsBar = useRef<HTMLElement>(null);
-  const [projectDragLimit, setProjectDragLimit] = useState(0);
   const [activeProject, setActiveProject] = useState(0);
-  const [activeProcess, setActiveProcess] = useState(0);
   const [activeFaq, setActiveFaq] = useState<number | null>(2);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const heroRef = useRef<HTMLDivElement>(null);
   useHeroParallax(heroRef);
   const ctaHero = useMagnetic<HTMLAnchorElement>();
-  const isMobile = useIsMobile();
   // Com movimento reduzido o trilho nao e dirigido pelo scroll: o carrossel
   // vira rolagem horizontal no dedo. No celular normal ele trava, como no desktop.
   const carrosselNativo = prefersReducedMotion;
@@ -389,7 +356,6 @@ export function ViveciRedesign() {
     };
   }, []);
 
-  const introProgress = usePinnedProgress(intro);
   /**
    * Desktop: o trilho anda de projeto em projeto. O scroll escolhe o card e a
    * mola leva o trilho até a posição exata dele — assim nunca para no meio de
@@ -407,11 +373,11 @@ export function ViveciRedesign() {
   const introVisible = introPhase !== "done";
 
   useEffect(() => {
-    if (prefersReducedMotion) { setIntroPhase("done"); return; }
+    if (prefersReducedMotion) { const frame = requestAnimationFrame(() => setIntroPhase("done")); return () => cancelAnimationFrame(frame); }
     // A abertura sempre começa do topo, mesmo se o navegador restaurar o scroll.
     if (!window.location.hash) window.scrollTo(0, 0);
     // espera o traçado, mais o lettering e o acento que entram depois dele
-    const hold = (LOGO_DRAW_DURATION + .92) * 1000;
+    const hold = (LOGO_DRAW_DURATION + .32) * 1000;
     const exit = 620;
     const toExit = setTimeout(() => setIntroPhase("exit"), hold);
     const toDone = setTimeout(() => setIntroPhase("done"), hold + exit);
@@ -438,7 +404,9 @@ export function ViveciRedesign() {
   }, [introVisible, prefersReducedMotion]);
 
   useEffect(() => {
-    if (introPhase === "done") setShowWhatsApp(true);
+    if (introPhase !== "done") return;
+    const frame = requestAnimationFrame(() => setShowWhatsApp(true));
+    return () => cancelAnimationFrame(frame);
   }, [introPhase]);
 
 
@@ -518,27 +486,17 @@ export function ViveciRedesign() {
     return () => mm.revert();
   }, { dependencies: [] });
 
-  /** Deslocamento que deixa cada card centralizado no viewport. */
-  const centeredOffset = (index: number) => {
-    const viewport = projectsViewport.current;
-    const track = projectsTrack.current;
-    const card = track?.children[index] as HTMLElement | undefined;
-    if (!viewport || !card) return 0;
-    return card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
-  };
-
-
   /**
    * Índice do card mais próximo do centro do carrossel.
    * Lido do DOM, não do estado: as setas precisam funcionar em toques
    * seguidos, antes do evento de scroll atualizar o React.
    */
-  const nearestProject = () => {
+  const nearestProject = useCallback(() => {
     const viewport = projectsViewport.current;
     const track = projectsTrack.current;
-    if (!viewport || !track) return activeProject;
+    if (!viewport || !track) return 0;
     const cards = Array.from(track.children) as HTMLElement[];
-    if (!cards.length) return activeProject;
+    if (!cards.length) return 0;
     const center = viewport.scrollLeft + viewport.clientWidth / 2;
     let best = 0;
     let bestDistance = Infinity;
@@ -547,7 +505,7 @@ export function ViveciRedesign() {
       if (distance < bestDistance) { bestDistance = distance; best = index; }
     });
     return best;
-  };
+  }, []);
 
   // Celular: o projeto ativo acompanha a posição do carrossel.
   useEffect(() => {
@@ -561,16 +519,13 @@ export function ViveciRedesign() {
     viewport.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => viewport.removeEventListener("scroll", onScroll);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [carrosselNativo]);
+  }, [carrosselNativo, nearestProject]);
 
   useEffect(() => {
     const measure = () => {
       const viewport = projectsViewport.current;
       const track = projectsTrack.current;
       if (!viewport || !track) return;
-      const limit = Math.max(0, track.scrollWidth - viewport.clientWidth);
-      setProjectDragLimit(limit);
       // Quem recentraliza no desktop agora e o ScrollTrigger (invalidateOnRefresh).
       if (!carrosselNativo) ScrollTrigger.refresh();
     };
@@ -579,8 +534,7 @@ export function ViveciRedesign() {
     if (projectsViewport.current) observer.observe(projectsViewport.current);
     if (projectsTrack.current) observer.observe(projectsTrack.current);
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [carrosselNativo, activeProject]);
+  }, [carrosselNativo]);
 
   const goToProject = (index: number) => {
     // Celular: centraliza o card no carrossel — o scroll-snap trava nele.
@@ -607,7 +561,7 @@ export function ViveciRedesign() {
     goToProject(Math.max(0, Math.min(projects.length - 1, from + direction)));
   };
 
-  return <main className={styles.site}>
+  return <main ref={depthRoot} className={styles.site}>
     <StickyHeader />
     <Cursor />
     <section ref={intro} className={styles.intro} id="inicio">
@@ -645,6 +599,7 @@ export function ViveciRedesign() {
 
         <motion.div
           className={styles.hero}
+          data-depth="hero"
           ref={heroRef}
           initial={false}
           animate={{
@@ -658,7 +613,7 @@ export function ViveciRedesign() {
             <nav aria-label="Navegação principal"><a href="#inicio">Início</a><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a className={styles.headerCta} href="#contato" aria-label="Iniciar projeto"><span>Iniciar projeto</span><b>→</b></a></nav>
           </header>
           <div className={styles.heroPhoto} data-camada="foto">
-            <Image src="/images/vvc-android-hero.png" fill preload quality={100} sizes="100vw" alt="Android de acabamento preto e azul representando a tecnologia da Viveci" />
+            <Image data-depth-plane src="/images/vvc-android-hero.png" fill preload quality={100} sizes="100vw" alt="Android de acabamento preto e azul representando a tecnologia da Viveci" />
           </div>
           <div className={styles.heroShade} data-camada="fundo"/>
           <div className={styles.heroCopy}>
@@ -695,6 +650,7 @@ export function ViveciRedesign() {
           <div ref={projectsTrack} className={styles.projectsTrack}>
             {projects.map((project, index) => <motion.article
               className={styles.projectCard}
+              data-depth="project"
               data-cursor="Ver"
               data-active={activeProject === index}
               key={project.area}
@@ -707,7 +663,7 @@ export function ViveciRedesign() {
               }}
               transition={{ duration: .5, ease: [.22, 1, .36, 1] }}
             >
-              <div className={styles.projectShell}>
+              <div className={styles.projectShell} data-depth-plane>
                 <div className={styles.projectImage}>
                   <DistortionImage
                     src={project.image}
@@ -759,10 +715,10 @@ export function ViveciRedesign() {
       </div>
       <span className={styles.stackLabel}>Stack ilustrativa · a validar</span>
       <div className={styles.technologyStack}>
-        {technologyLayers.map((layer, index) => <Reveal as="article" index={index} className={styles.technologyLayer} key={layer.title}>
+        {technologyLayers.map((layer, index) => <Reveal as="article" index={index} className={styles.technologyLayer} key={layer.title} data-depth="technology">
           <b className={styles.layerNumber}>{String(index + 1).padStart(2, "0")}</b>
           <div className={styles.layerCopy}><h3>{layer.title}</h3><i/><p>{layer.description}</p></div>
-          <Stagger className={styles.technologyItems} intervalo={0.05} deslocamento={12}>{layer.technologies.map((technology) => <div className={styles.technologyItem} key={technology}><TechIcon name={technology}/><span>{technology}</span></div>)}</Stagger>
+          <Stagger className={styles.technologyItems} data-depth-plane intervalo={0.05} deslocamento={12}>{layer.technologies.map((technology) => <div className={styles.technologyItem} key={technology}><TechIcon name={technology}/><span>{technology}</span></div>)}</Stagger>
         </Reveal>)}
       </div>
       <div className={styles.technologyDeploy}>

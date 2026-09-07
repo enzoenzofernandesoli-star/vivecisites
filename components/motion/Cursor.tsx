@@ -19,8 +19,11 @@ export function Cursor() {
   useEffect(() => {
     const fino = window.matchMedia("(pointer: fine)");
     const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (!fino.matches || semMovimento.matches) return;
-    setAtivo(true);
+    const update = () => setAtivo(fino.matches && !semMovimento.matches);
+    const frame = requestAnimationFrame(update);
+    fino.addEventListener("change", update);
+    semMovimento.addEventListener("change", update);
+    return () => { cancelAnimationFrame(frame); fino.removeEventListener("change", update); semMovimento.removeEventListener("change", update); };
   }, []);
 
   useEffect(() => {
@@ -49,9 +52,11 @@ export function Cursor() {
 
     window.addEventListener("pointermove", mover, { passive: true });
     document.addEventListener("pointerleave", sair);
+    window.addEventListener("blur", sair);
     return () => {
       window.removeEventListener("pointermove", mover);
       document.removeEventListener("pointerleave", sair);
+      window.removeEventListener("blur", sair);
       gsap.killTweensOf(el);
     };
   }, [ativo]);
