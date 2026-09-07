@@ -2,26 +2,19 @@
 import { motion, MotionValue } from "framer-motion";
 
 /**
- * Wordmark VVC — dois "V" que se cruzam logo abaixo do topo e um "C" quadrado
- * aberto à direita, em linha fina, seguindo a logo original do estúdio.
- *
- * O traçado é sequencial de propósito: na logo o desenho é feito de uma
- * caneta só, então um traço termina onde o próximo começa. Os dois últimos
- * saem juntos do canto onde o segundo V aterrissa — é ali que a linha se
- * abre no "C", e desenhar o "C" como um traço solto quebrava essa leitura.
+ * Símbolo VVC vetorizado a partir da marca de referência do estúdio.
  *
  * As durações são proporcionais ao comprimento de cada traço, para a ponta
  * correr sempre na mesma velocidade.
  */
 const STROKES: { d: string; inicio: number; duracao: number }[] = [
   // V1
-  { d: "M 6 16 L 156 214 L 319 16", inicio: 0, duracao: 0.5 },
-  // V2 — cruza o braço direito do V1 perto do topo e aterrissa no canto do C
-  { d: "M 284 16 L 441 214 L 588 16", inicio: 0.42, duracao: 0.5 },
-  // C quadrado: a partir do canto, o topo abre para a direita...
-  { d: "M 588 16 L 796 16", inicio: 0.88, duracao: 0.22 },
-  // ...e a mesma origem desce e fecha embaixo
-  { d: "M 588 16 L 588 214 L 796 214", inicio: 0.88, duracao: 0.44 },
+  { d: "M 8 14 L 160 214 L 313 14", inicio: 0, duracao: 0.52 },
+  // O segundo V começa depois do primeiro e termina no encontro com o C.
+  { d: "M 324 38 L 448 214 L 582 14", inicio: 0.46, duracao: 0.5 },
+  // A barra superior e o corpo inferior do C são separados, como na referência.
+  { d: "M 582 14 L 794 14", inicio: 0.9, duracao: 0.22 },
+  { d: "M 582 55 L 582 214 L 794 214", inicio: 0.9, duracao: 0.42 },
 ];
 
 /** Tempo total do traçado, em segundos. */
@@ -46,7 +39,7 @@ export function VVCLogo({
       <g
         fill="none"
         stroke="currentColor"
-        strokeWidth="10"
+        strokeWidth="16"
         strokeLinecap="butt"
         strokeLinejoin="miter"
       >

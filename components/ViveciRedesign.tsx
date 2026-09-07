@@ -378,7 +378,7 @@ export function ViveciRedesign() {
     // A abertura sempre começa do topo, mesmo se o navegador restaurar o scroll.
     if (!window.location.hash) window.scrollTo(0, 0);
     // espera o traçado, mais o lettering e o acento que entram depois dele
-    const hold = (LOGO_DRAW_DURATION + .32) * 1000;
+    const hold = (LOGO_DRAW_DURATION + 1.05) * 1000;
     const exit = 620;
     const toExit = setTimeout(() => setIntroPhase("exit"), hold);
     const toDone = setTimeout(() => setIntroPhase("done"), hold + exit);
@@ -614,7 +614,7 @@ export function ViveciRedesign() {
             <nav aria-label="Navegação principal"><a href="#inicio">Início</a><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a className={styles.headerCta} href="#contato" aria-label="Iniciar projeto"><span>Iniciar projeto</span><b>→</b></a></nav>
           </header>
           <div className={styles.heroPhoto} data-camada="foto">
-            <Image data-depth-plane src="/images/vvc-android-hero.png" fill preload quality={100} sizes="100vw" alt="Android de acabamento preto e azul representando a tecnologia da Viveci" />
+            <Image data-depth-plane src="/images/vvc-android-hero-blue.png" fill preload quality={100} sizes="100vw" alt="Android de acabamento preto e azul representando a tecnologia da Viveci" />
           </div>
           <HeroSpatialScene />
           <div className={styles.heroShade} data-camada="fundo"/>
@@ -759,7 +759,7 @@ export function ViveciRedesign() {
       </div>
       <div className={styles.contactRobot} aria-hidden>
         <i />
-        <Image src="/images/vvc-android-hero.png" fill quality={100} sizes="(max-width: 800px) 90vw, 42vw" alt="" />
+        <Image src="/images/vvc-android-hero-blue.png" fill quality={100} sizes="(max-width: 800px) 90vw, 42vw" alt="" />
       </div>
       <div className={styles.contactPanel}><ContactForm/></div>
       <div className={styles.contactSignature}><span>Sua visão. Nossa tecnologia.</span><i/><b>VIVECI</b></div>

@@ -11,8 +11,18 @@ with sync_playwright() as p:
     page=browser.new_page(viewport={"width":1440,"height":900})
     errors=[]
     page.on("pageerror",lambda error:errors.append(str(error)))
-    page.goto("http://localhost:3190",wait_until="networkidle")
-    page.wait_for_timeout(3500)
+    page.goto("http://localhost:3190",wait_until="domcontentloaded")
+    page.wait_for_timeout(2050)
+    mark=page.locator('svg[aria-label="VVC"]').first
+    assert mark.locator("path").count()==4
+    assert mark.locator("path").nth(1).get_attribute("d")=="M 324 38 L 448 214 L 582 14"
+    page.screenshot(path=str(out/"logo-intro-1440.png"))
+    page.wait_for_load_state("networkidle")
+    page.wait_for_timeout(1850)
+    logos=page.locator('svg[aria-label="VVC"]')
+    assert logos.count()>=3
+    assert logos.evaluate_all("els=>els.every(el=>el.querySelectorAll('path').length===4 && el.querySelectorAll('path')[1].getAttribute('d')==='M 324 38 L 448 214 L 582 14')")
+    assert page.locator("main").evaluate("el=>getComputedStyle(el).getPropertyValue('--red').trim()==='#1877ff'")
     assert page.locator("h1").first.evaluate("el=>el.getBoundingClientRect().width>300")
     spatial=page.locator('canvas[data-spatial-scene="true"]')
     assert spatial.count()==1

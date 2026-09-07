@@ -13,6 +13,12 @@ Base: `37c122d`, branch `melhoria/animacoes-original`. O redesign anterior não 
 - O robô original permanece como direção visual; a nova geometria 3D é procedural e se integra à órbita já presente na arte, evitando um modelo externo incompatível com a identidade.
 - A cena 3D só é montada em desktop com ponteiro preciso e movimento permitido. Ela pausa fora da viewport ou com a aba oculta e libera canvas, programas, geometrias e contexto WebGL ao desmontar.
 
+## Marca e cor
+
+- O símbolo VVC foi redesenhado em SVG a partir da referência fornecida: dois Vs consecutivos, segundo V elevado na origem e C quadrado com abertura entre a barra superior e a haste.
+- O mesmo componente alimenta abertura, cabeçalho, navegação fixa e rodapé. Na abertura, `DIGITAL STUDIO` e o acento azul permanecem visíveis antes da transição.
+- Todos os acentos vermelhos foram convertidos para azul elétrico. A imagem do robô ganhou uma versão não destrutiva em `public/images/vvc-android-hero-blue.png`, alterando somente a luz vermelha do peito.
+
 ## Verificação
 
 `npm run lint`, `npm run build` e `python scripts/verificar-animacoes.py` (preview na porta 3190).
