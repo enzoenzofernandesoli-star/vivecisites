@@ -548,6 +548,9 @@
 .hero:after{background:linear-gradient(90deg,rgba(2,8,20,.62) 0%,rgba(2,8,20,.24) 41%,transparent 66%),linear-gradient(180deg,rgba(2,8,20,.04) 58%,rgba(2,8,20,.44) 100%)}
 .heroPhoto{inset:-8vh -2vw -10vh 0}
 .heroPhoto img{object-position:center center}
+.heroSpatialScene{position:absolute;z-index:2;top:5%;right:-3%;width:62%;height:88%;overflow:hidden;pointer-events:none;opacity:.92;mix-blend-mode:screen;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 94%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 94%,transparent 100%)}
+.heroSpatialScene canvas{display:block;width:100%;height:100%;opacity:0;animation:spatialSceneIn 1.2s .35s var(--ease-out) forwards}
+@keyframes spatialSceneIn{to{opacity:1}}
 .heroShade{z-index:1;background:radial-gradient(circle at 22% 56%,transparent 0 23%,rgba(2,8,20,.08) 42%,transparent 63%)}
 .header{height:88px;left:5.4vw;right:5.4vw;border:0;backdrop-filter:none}
 .brand{gap:20px;color:var(--ivory)}
@@ -583,6 +586,7 @@
   .hero:after{background:linear-gradient(180deg,rgba(2,8,20,.06) 0 38%,rgba(2,8,20,.76) 66%,#020814 100%)}
   .heroPhoto{inset:-5vh -43vw 14vh -25vw}
   .heroPhoto img{object-position:69% center}
+  .heroSpatialScene{display:none}
   .header{height:72px;left:5vw;right:5vw}
   .brand{gap:12px}
   .brand svg{width:70px}
@@ -614,7 +618,7 @@
   .headerCta span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 }
 
-@media(prefers-reduced-motion:reduce){.heroMouse i{animation:none}}
+@media(prefers-reduced-motion:reduce){.heroMouse i,.heroSpatialScene canvas{animation:none}.heroSpatialScene{display:none}}
 
 /* Serviços — quatro frentes em módulos verticais, conforme a referência */
 .services{

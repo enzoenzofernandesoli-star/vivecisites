@@ -13,6 +13,9 @@ with sync_playwright() as p:
     page.on("pageerror",lambda error:errors.append(str(error)))
     page.goto("http://localhost:3190",wait_until="networkidle")
     page.wait_for_timeout(3500)
+    spatial=page.locator('canvas[data-spatial-scene="true"]')
+    assert spatial.count()==1
+    assert spatial.evaluate("el=>el.width>600 && el.height>500")
     page.screenshot(path=str(out/"original-motion-1440.png"))
     hero=page.locator('[data-depth="hero"] [data-depth-plane]')
     page.mouse.move(500,400)
@@ -38,7 +41,7 @@ with sync_playwright() as p:
     assert page.locator("canvas").count()==0
     assert page.locator('[data-depth-plane]').first.evaluate("el=>getComputedStyle(el).transform") == "none"
     assert not errors,errors
-    results.append({"desktop_3d":True,"webgl_refraction":True,"reduced_motion_cleanup":True,"errors":errors})
+    results.append({"desktop_3d":True,"hero_spatial_scene":True,"webgl_refraction":True,"reduced_motion_cleanup":True,"errors":errors})
     page.close()
     for width in [375,768]:
         page=browser.new_page(viewport={"width":width,"height":900},has_touch=True,is_mobile=True)

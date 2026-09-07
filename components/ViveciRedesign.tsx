@@ -14,6 +14,7 @@ import { useDepthMotion } from "@/hooks/useDepthMotion";
 import { StickyHeader } from "./motion/StickyHeader";
 import { Cursor } from "./motion/Cursor";
 import { DistortionImage } from "./motion/DistortionImage";
+import { HeroSpatialScene } from "./motion/HeroSpatialScene";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
@@ -615,6 +616,7 @@ export function ViveciRedesign() {
           <div className={styles.heroPhoto} data-camada="foto">
             <Image data-depth-plane src="/images/vvc-android-hero.png" fill preload quality={100} sizes="100vw" alt="Android de acabamento preto e azul representando a tecnologia da Viveci" />
           </div>
+          <HeroSpatialScene />
           <div className={styles.heroShade} data-camada="fundo"/>
           <div className={styles.heroCopy}>
             <TextReveal as="h1" modo="chars" start="top 95%" delay={0.25} data-camada="titulo">VIVECI</TextReveal>
