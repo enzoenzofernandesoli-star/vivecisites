@@ -548,7 +548,7 @@
 .hero:after{background:linear-gradient(90deg,rgba(2,8,20,.62) 0%,rgba(2,8,20,.24) 41%,transparent 66%),linear-gradient(180deg,rgba(2,8,20,.04) 58%,rgba(2,8,20,.44) 100%)}
 .heroPhoto{inset:-8vh -2vw -10vh 0}
 .heroPhoto img{object-position:center center}
-.heroSpatialScene{position:absolute;z-index:2;top:5%;right:-3%;width:62%;height:88%;overflow:hidden;pointer-events:none;opacity:.92;mix-blend-mode:screen;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 94%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 94%,transparent 100%)}
+.heroSpatialScene{position:absolute;z-index:2;inset:0;overflow:hidden;pointer-events:none;opacity:.9;mix-blend-mode:screen;-webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.82),#000 68%,rgba(0,0,0,.55));mask-image:linear-gradient(180deg,rgba(0,0,0,.82),#000 68%,rgba(0,0,0,.55))}
 .heroSpatialScene canvas{display:block;width:100%;height:100%;opacity:0;animation:spatialSceneIn 1.2s .35s var(--ease-out) forwards}
 @keyframes spatialSceneIn{to{opacity:1}}
 .heroShade{z-index:1;background:radial-gradient(circle at 22% 56%,transparent 0 23%,rgba(2,8,20,.08) 42%,transparent 63%)}

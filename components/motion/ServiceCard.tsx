@@ -39,9 +39,9 @@ export function ServiceCard({
         scrollTrigger: { trigger: el, start: "top 88%", once: true },
       });
 
-      tl.from(el, { opacity: 0, y: 34, duration: 0.65, delay: atraso })
-        .from(icon, { scale: 0.72, opacity: 0, duration: 0.5, ease: "back.out(1.7)" }, "-=0.34")
-        .from(resto, { opacity: 0, y: 14, duration: 0.45, stagger: 0.07 }, "-=0.28");
+      tl.from(el, { opacity: 0, y: 46, scale: .97, rotationX: 7, transformPerspective: 1100, transformOrigin: "50% 100%", duration: 0.76, delay: atraso })
+        .from(icon, { scale: 0.52, rotation: -18, opacity: 0, duration: 0.58, ease: "back.out(1.45)" }, "-=0.42")
+        .from(resto, { opacity: 0, y: 18, x: -8, duration: 0.52, stagger: 0.075 }, "-=0.32");
 
       return () => { tl.scrollTrigger?.kill(); tl.kill(); };
       });

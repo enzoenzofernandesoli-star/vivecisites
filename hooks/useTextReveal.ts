@@ -22,9 +22,15 @@ export function useTextReveal<T extends HTMLElement>(options?: {
           aria: "auto",
         });
         const targets = options?.modo === "chars" ? split.chars : split.words;
+        gsap.set(el, { transformPerspective: 900 });
         tween = gsap.from(targets, {
-          y: 18, duration: options?.duration ?? .6, ease: "power3.out",
-          stagger: { amount: Math.min(.3, targets.length * (options?.stagger ?? .025)) },
+          yPercent: 112,
+          rotationX: -34,
+          opacity: .08,
+          transformOrigin: "50% 100%",
+          duration: options?.duration ?? .78,
+          ease: "power4.out",
+          stagger: { amount: Math.min(.42, targets.length * (options?.stagger ?? .032)) },
           delay: options?.delay ?? 0,
           scrollTrigger: { trigger: el, start: options?.start ?? "top 90%", once: true },
         });

@@ -75,6 +75,63 @@ const FRAGMENT_POINTS = /* glsl */ `
   }
 `;
 
+const VERTEX_STARS = /* glsl */ `
+  precision highp float;
+  attribute vec3 position;
+  attribute float seed;
+  uniform mat4 modelViewMatrix;
+  uniform mat4 projectionMatrix;
+  uniform float uTime;
+  varying float vSeed;
+  void main() {
+    vec3 p = position;
+    p.z = mod(p.z + uTime * (0.035 + seed * 0.025) + 12.0, 14.0) - 10.0;
+    vec4 viewPosition = modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * viewPosition;
+    gl_PointSize = clamp((6.0 + seed * 13.0) / max(1.0, -viewPosition.z), 0.75, 2.35);
+    vSeed = seed;
+  }
+`;
+
+const FRAGMENT_STARS = /* glsl */ `
+  precision highp float;
+  varying float vSeed;
+  void main() {
+    float d = length(gl_PointCoord - 0.5);
+    float alpha = (1.0 - smoothstep(0.04, 0.5, d)) * (0.2 + vSeed * 0.52);
+    gl_FragColor = vec4(mix(vec3(0.2, 0.55, 1.0), vec3(0.86, 0.95, 1.0), vSeed), alpha);
+  }
+`;
+
+const VERTEX_GRID = /* glsl */ `
+  precision highp float;
+  attribute vec3 position;
+  uniform mat4 modelViewMatrix;
+  uniform mat4 projectionMatrix;
+  varying float vDepth;
+  void main() {
+    vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * viewPosition;
+    vDepth = smoothstep(-12.0, 2.0, position.z);
+  }
+`;
+
+const FRAGMENT_GRID = /* glsl */ `
+  precision highp float;
+  varying float vDepth;
+  void main() {
+    gl_FragColor = vec4(0.08, 0.43, 1.0, vDepth * 0.22);
+  }
+`;
+
+function seededRandom(seed: number) {
+  let state = seed >>> 0;
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+}
+
 /** Cena espacial procedural: geometria 3D real, sem modelo externo ou loop fora da viewport. */
 export function HeroSpatialScene() {
   const host = useRef<HTMLDivElement>(null);
@@ -90,7 +147,7 @@ export function HeroSpatialScene() {
     const mount = async () => {
       if (!media.matches || destroyScene) return;
       const id = ++generation;
-      const { Camera, Mesh, Program, Renderer, Sphere, Torus, Transform, Vec3 } = await import("ogl");
+      const { Camera, Geometry, Mesh, Program, Renderer, Sphere, Torus, Transform, Vec3 } = await import("ogl");
       if (id !== generation || !media.matches || !root.isConnected) return;
 
       const renderer = new Renderer({ alpha: true, antialias: true, depth: true, dpr: Math.min(devicePixelRatio, 1.35), powerPreference: "high-performance" });
@@ -107,14 +164,14 @@ export function HeroSpatialScene() {
       camera.lookAt([0, 0, 0]);
       const scene = new Transform();
       const rig = new Transform();
-      rig.position.set(0.65, 0.22, 0);
+      rig.position.set(1.65, 0.22, 0);
       rig.rotation.set(-0.08, -0.12, 0.08);
       rig.setParent(scene);
 
       const light = new Vec3(-0.35, 0.7, 0.8).normalize();
       const clock = { value: 0 };
       const programs: InstanceType<typeof Program>[] = [];
-      const geometries: (InstanceType<typeof Sphere> | InstanceType<typeof Torus>)[] = [];
+      const geometries: { remove(): void }[] = [];
       const meshes: InstanceType<typeof Mesh>[] = [];
 
       const material = (color: [number, number, number], alpha: number) => {
@@ -165,6 +222,55 @@ export function HeroSpatialScene() {
       geometries.push(particleGeometry);
       meshes.push(particles);
 
+      const random = seededRandom(20260907);
+      const starCount = 680;
+      const starPositions = new Float32Array(starCount * 3);
+      const starSeeds = new Float32Array(starCount);
+      for (let i = 0; i < starCount; i++) {
+        starPositions[i * 3] = (random() - 0.5) * 18;
+        starPositions[i * 3 + 1] = (random() - 0.5) * 8;
+        starPositions[i * 3 + 2] = random() * 14 - 10;
+        starSeeds[i] = random();
+      }
+      const starGeometry = new Geometry(gl, {
+        position: { size: 3, data: starPositions },
+        seed: { size: 1, data: starSeeds },
+      });
+      const starProgram = new Program(gl, {
+        vertex: VERTEX_STARS,
+        fragment: FRAGMENT_STARS,
+        transparent: true,
+        cullFace: false,
+        depthWrite: false,
+        uniforms: { uTime: clock },
+      });
+      starProgram.setBlendFunc(gl.SRC_ALPHA, gl.ONE);
+      const stars = new Mesh(gl, { geometry: starGeometry, program: starProgram, mode: gl.POINTS, frustumCulled: false });
+      stars.renderOrder = 0;
+      stars.setParent(scene);
+      programs.push(starProgram);
+      geometries.push(starGeometry);
+      meshes.push(stars);
+
+      const gridValues: number[] = [];
+      for (let x = -8; x <= 8; x += 0.8) gridValues.push(x, -1.9, 3, x, -1.9, -12);
+      for (let z = 3; z >= -12; z -= 0.75) gridValues.push(-8, -1.9, z, 8, -1.9, z);
+      const gridGeometry = new Geometry(gl, { position: { size: 3, data: new Float32Array(gridValues) } });
+      const gridProgram = new Program(gl, {
+        vertex: VERTEX_GRID,
+        fragment: FRAGMENT_GRID,
+        transparent: true,
+        cullFace: false,
+        depthWrite: false,
+      });
+      gridProgram.setBlendFunc(gl.SRC_ALPHA, gl.ONE);
+      const grid = new Mesh(gl, { geometry: gridGeometry, program: gridProgram, mode: gl.LINES, frustumCulled: false });
+      grid.renderOrder = 0;
+      grid.setParent(scene);
+      programs.push(gridProgram);
+      geometries.push(gridGeometry);
+      meshes.push(grid);
+
       let width = 0;
       let height = 0;
       let visible = true;
@@ -199,8 +305,8 @@ export function HeroSpatialScene() {
         smoothY += (pointerY - smoothY) * Math.min(1, delta * 3.7);
         rig.rotation.y = -0.12 + smoothX * 0.2 + clock.value * 0.025;
         rig.rotation.x = -0.08 - smoothY * 0.13;
-        camera.position.x = smoothX * 0.24;
-        camera.position.y = -smoothY * 0.16;
+        camera.position.x = smoothX * 0.3;
+        camera.position.y = -smoothY * 0.2;
         camera.lookAt([0, 0, 0]);
         meshes[0].rotation.z += delta * 0.08;
         meshes[1].rotation.y -= delta * 0.055;

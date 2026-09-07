@@ -36,8 +36,12 @@ export function Stagger({
       gsap.from(filhos, {
         opacity: 0,
         y: deslocamento,
-        duration: 0.6,
-        ease: "power3.out",
+        scale: .97,
+        rotationX: -9,
+        transformPerspective: 900,
+        transformOrigin: "50% 100%",
+        duration: 0.72,
+        ease: "power4.out",
         stagger: intervalo,
         scrollTrigger: { trigger: el, start: "top 88%", once: true },
       });

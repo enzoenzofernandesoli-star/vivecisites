@@ -13,9 +13,11 @@ with sync_playwright() as p:
     page.on("pageerror",lambda error:errors.append(str(error)))
     page.goto("http://localhost:3190",wait_until="networkidle")
     page.wait_for_timeout(3500)
+    assert page.locator("h1").first.evaluate("el=>el.getBoundingClientRect().width>300")
     spatial=page.locator('canvas[data-spatial-scene="true"]')
     assert spatial.count()==1
-    assert spatial.evaluate("el=>el.width>600 && el.height>500")
+    assert spatial.evaluate("el=>el.width>1200 && el.height>500")
+    assert spatial.evaluate("el=>Boolean(el.getContext('webgl2')||el.getContext('webgl'))")
     page.screenshot(path=str(out/"original-motion-1440.png"))
     hero=page.locator('[data-depth="hero"] [data-depth-plane]')
     page.mouse.move(500,400)

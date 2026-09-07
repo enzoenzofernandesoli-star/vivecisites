@@ -4,10 +4,11 @@ Base: `37c122d`, branch `melhoria/animacoes-original`. O redesign anterior não 
 
 ## Alterações
 
-- Cena espacial WebGL no herói com câmera em perspectiva, três malhas toroidais iluminadas e campo esférico de partículas. A câmera e o conjunto 3D respondem ao ponteiro com amortecimento.
+- Cena espacial WebGL em toda a primeira dobra com câmera em perspectiva, três malhas toroidais iluminadas, campo esférico de partículas, estrelas distribuídas no eixo Z e horizonte digital construído com linhas 3D. A câmera e o conjunto 3D respondem ao ponteiro com amortecimento.
 - Perspectiva sutil no herói e nos cartões, com retorno suave e transformações independentes da rolagem.
 - Refração WebGL localizada no ponteiro, preservando proporção e enquadramento da imagem. Renderização sob demanda, encerrada ao sair da tela.
 - Entradas de texto e seções mais curtas, botões magnéticos limitados e limpeza dos efeitos ao mudar a preferência de movimento.
+- Textos entram com rotação no eixo X e recorte por linha; cards e grupos recebem escala, perspectiva e assentamento escalonado dentro de um único vocabulário de movimento premium.
 - Scroll suave apenas no desktop com ponteiro preciso; tarefas decorativas pausadas com a aba oculta.
 - O robô original permanece como direção visual; a nova geometria 3D é procedural e se integra à órbita já presente na arte, evitando um modelo externo incompatível com a identidade.
 - A cena 3D só é montada em desktop com ponteiro preciso e movimento permitido. Ela pausa fora da viewport ou com a aba oculta e libera canvas, programas, geometrias e contexto WebGL ao desmontar.

@@ -31,9 +31,13 @@ export function Reveal({
       mm.add("(prefers-reduced-motion: no-preference)", () => {
       gsap.from(el, {
         opacity: 0,
-        y: 20,
-        duration: 0.8,
-        ease: "power3.out",
+        y: 34,
+        scale: .985,
+        rotationX: 3,
+        transformPerspective: 1000,
+        transformOrigin: "50% 100%",
+        duration: 0.9,
+        ease: "power4.out",
         delay: index * 0.055,
         scrollTrigger: {
           trigger: el,
