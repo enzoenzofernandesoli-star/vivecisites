@@ -614,7 +614,7 @@ export function ViveciRedesign() {
             <nav aria-label="Navegação principal"><a href="#inicio">Início</a><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#processo">Processo</a><a className={styles.headerCta} href="#contato" aria-label="Iniciar projeto"><span>Iniciar projeto</span><b>→</b></a></nav>
           </header>
           <div className={styles.heroPhoto} data-camada="foto">
-            <Image data-depth-plane src="/images/vvc-android-hero-blue.png" fill preload quality={100} sizes="100vw" alt="Android de acabamento preto e azul representando a tecnologia da Viveci" />
+            <Image data-depth-plane src="/images/vvc-android-hero-blue.png" fill preload loading="eager" quality={100} sizes="100vw" alt="Android de acabamento preto e azul representando a tecnologia da Viveci" />
           </div>
           <HeroSpatialScene />
           <div className={styles.heroShade} data-camada="fundo"/>

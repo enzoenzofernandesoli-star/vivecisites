@@ -24,10 +24,15 @@ with sync_playwright() as p:
     assert logos.evaluate_all("els=>els.every(el=>el.querySelectorAll('path').length===4 && el.querySelectorAll('path')[1].getAttribute('d')==='M 324 38 L 448 214 L 582 14')")
     assert page.locator("main").evaluate("el=>getComputedStyle(el).getPropertyValue('--red').trim()==='#1877ff'")
     assert page.locator("h1").first.evaluate("el=>el.getBoundingClientRect().width>300")
-    spatial=page.locator('canvas[data-spatial-scene="true"]')
-    assert spatial.count()==1
-    assert spatial.evaluate("el=>el.width>1200 && el.height>500")
-    assert spatial.evaluate("el=>Boolean(el.getContext('webgl2')||el.getContext('webgl'))")
+    page.wait_for_selector('canvas[data-robot-canvas="true"]',state="attached")
+    robot=page.locator('canvas[data-robot-canvas="true"]')
+    assert robot.count()==1
+    assert page.locator('canvas[data-spatial-scene="true"]').count()==0
+    assert robot.evaluate("el=>el.width>1200 && el.height>500")
+    assert robot.evaluate("el=>Boolean(el.getContext('webgl2')||el.getContext('webgl'))")
+    assert page.locator('[class*="heroSpatialScene"][data-pronto="true"]').count()==1
+    assert (Path(__file__).resolve().parents[1]/"public/models/robot-expressive.glb").stat().st_size==463988
+    assert "CC0 1.0" in (Path(__file__).resolve().parents[1]/"public/models/ATTRIBUTION.md").read_text(encoding="utf-8")
     page.screenshot(path=str(out/"original-motion-1440.png"))
     hero=page.locator('[data-depth="hero"] [data-depth-plane]')
     page.mouse.move(500,400)
@@ -50,10 +55,10 @@ with sync_playwright() as p:
     assert first.locator('[data-pronto="true"]').count()==0
     page.emulate_media(reduced_motion="reduce")
     page.wait_for_timeout(600)
-    assert page.locator("canvas").count()==0
+    assert page.locator('canvas[data-robot-canvas="true"]').count()==0
     assert page.locator('[data-depth-plane]').first.evaluate("el=>getComputedStyle(el).transform") == "none"
     assert not errors,errors
-    results.append({"desktop_3d":True,"hero_spatial_scene":True,"webgl_refraction":True,"reduced_motion_cleanup":True,"errors":errors})
+    results.append({"desktop_3d":True,"scroll_robot":True,"old_orbits_removed":True,"reduced_motion_cleanup":True,"errors":errors})
     page.close()
     for width in [375,768]:
         page=browser.new_page(viewport={"width":width,"height":900},has_touch=True,is_mobile=True)
