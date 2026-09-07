@@ -548,20 +548,6 @@
 .hero:after{background:linear-gradient(90deg,rgba(2,8,20,.62) 0%,rgba(2,8,20,.24) 41%,transparent 66%),linear-gradient(180deg,rgba(2,8,20,.04) 58%,rgba(2,8,20,.44) 100%)}
 .heroPhoto{inset:-8vh -2vw -10vh 0}
 .heroPhoto img{object-position:center center}
-.robotNarrator{position:fixed;z-index:35;top:0;left:0;width:clamp(190px,20vw,300px);height:clamp(300px,36vw,480px);pointer-events:none;opacity:0;visibility:hidden;will-change:transform,opacity}
-.robotViewport{position:absolute;z-index:1;inset:0;overflow:hidden;filter:drop-shadow(0 24px 30px rgba(0,0,0,.48));-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 6%,#000 90%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 6%,#000 90%,transparent 100%)}
-.robotViewport:before{content:"";position:absolute;inset:13% 0 5%;border-radius:50%;background:radial-gradient(circle,rgba(24,119,255,.26),transparent 67%);transform:scale(1.1)}
-.robotViewport:after{content:"";position:absolute;z-index:2;left:14%;right:10%;top:0;height:1px;background:linear-gradient(90deg,transparent,#56a6ff,transparent);box-shadow:0 0 16px rgba(24,119,255,.72);opacity:.55;animation:robotScan 4.8s ease-in-out infinite}
-.robotViewport canvas{position:relative;z-index:1;display:block;width:100%;height:100%}
-.robotSpeech{position:absolute;z-index:3;top:-10%;width:100%;padding:1rem 1.1rem;border:1px solid rgba(86,166,255,.72);border-radius:14px;background:rgba(2,8,20,.97);box-shadow:0 18px 48px rgba(0,0,0,.4),0 0 24px rgba(24,119,255,.16),inset 0 0 28px rgba(24,119,255,.08);backdrop-filter:blur(12px);color:#f4f1e9;transform-origin:bottom center}
-.robotNarrator[data-lado="direita"] .robotSpeech{right:0;transform-origin:bottom right}
-.robotNarrator[data-lado="esquerda"] .robotSpeech{left:0;transform-origin:bottom left}
-.robotSpeech:after{content:"";position:absolute;top:44%;width:28px;height:1px;background:linear-gradient(90deg,var(--signal-bright),transparent)}
-.robotNarrator[data-lado="direita"] .robotSpeech:after{left:100%}
-.robotNarrator[data-lado="esquerda"] .robotSpeech:after{right:100%;transform:scaleX(-1)}
-.robotSpeech span{display:block;margin-bottom:.55rem;color:#56a6ff;font-size:8px;letter-spacing:.28em;text-transform:uppercase}
-.robotSpeech p{margin:0;font-size:clamp(11px,.92vw,13px);line-height:1.6}
-@keyframes robotScan{0%,100%{opacity:0;transform:translateY(80px)}42%,58%{opacity:.65}50%{transform:translateY(310px)}}
 .heroShade{z-index:1;background:radial-gradient(circle at 22% 56%,transparent 0 23%,rgba(2,8,20,.08) 42%,transparent 63%)}
 .header{height:88px;left:5.4vw;right:5.4vw;border:0;backdrop-filter:none}
 .brand{gap:20px;color:var(--ivory)}
@@ -597,12 +583,6 @@
   .hero:after{background:linear-gradient(180deg,rgba(2,8,20,.06) 0 38%,rgba(2,8,20,.76) 66%,#020814 100%)}
   .heroPhoto{inset:-5vh -43vw 14vh -25vw}
   .heroPhoto img{object-position:69% center}
-  .robotNarrator{z-index:35;width:112px;height:184px}
-  .robotSpeech{top:-56px;width:min(218px,58vw);padding:.75rem .8rem;border-radius:10px;backdrop-filter:none}
-  .robotNarrator[data-lado="direita"] .robotSpeech{right:72%}
-  .robotNarrator[data-lado="esquerda"] .robotSpeech{left:72%}
-  .robotSpeech p{font-size:9px;line-height:1.45}
-  .robotSpeech span{margin-bottom:.35rem;font-size:6px}
   .header{height:72px;left:5vw;right:5vw}
   .brand{gap:12px}
   .brand svg{width:70px}
@@ -634,7 +614,7 @@
   .headerCta span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 }
 
-@media(prefers-reduced-motion:reduce){.heroMouse i,.robotViewport:after{animation:none}.robotNarrator{display:none}}
+@media(prefers-reduced-motion:reduce){.heroMouse i{animation:none}}
 
 /* Serviços — quatro frentes em módulos verticais, conforme a referência */
 .services{
