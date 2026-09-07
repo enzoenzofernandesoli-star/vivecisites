@@ -549,11 +549,10 @@
 .heroPhoto{inset:-8vh -2vw -10vh 0}
 .heroPhoto img{object-position:center center}
 .robotNarrator{position:fixed;z-index:35;top:0;left:0;width:clamp(190px,20vw,300px);height:clamp(300px,36vw,480px);pointer-events:none;opacity:0;visibility:hidden;will-change:transform,opacity}
-.robotNarratorAvatar{position:absolute;z-index:1;inset:0;transform-style:preserve-3d;will-change:transform}
-.robotNarratorPlane{position:absolute;inset:0;overflow:hidden;transform-style:preserve-3d;will-change:transform;filter:drop-shadow(0 22px 28px rgba(0,0,0,.42));-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 83%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 83%,transparent 100%)}
-.robotNarratorPlane:before{content:"";position:absolute;z-index:-1;inset:18% 5% 8%;border-radius:50%;background:radial-gradient(circle,rgba(var(--signal-rgb),.26),transparent 68%);transform:translateZ(-65px) scale(1.12)}
-.robotNarratorPlane:after{content:"";position:absolute;z-index:2;left:16%;right:8%;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--signal-bright),transparent);box-shadow:0 0 16px rgba(var(--signal-rgb),.7);opacity:.55;animation:robotScan 4.8s ease-in-out infinite}
-.robotNarratorPlane img{object-fit:cover;object-position:91% center;transform:translateZ(22px) scale(1.03);mix-blend-mode:screen}
+.robotViewport{position:absolute;z-index:1;inset:0;overflow:hidden;filter:drop-shadow(0 24px 30px rgba(0,0,0,.48));-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 6%,#000 90%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 6%,#000 90%,transparent 100%)}
+.robotViewport:before{content:"";position:absolute;inset:13% 0 5%;border-radius:50%;background:radial-gradient(circle,rgba(24,119,255,.26),transparent 67%);transform:scale(1.1)}
+.robotViewport:after{content:"";position:absolute;z-index:2;left:14%;right:10%;top:0;height:1px;background:linear-gradient(90deg,transparent,#56a6ff,transparent);box-shadow:0 0 16px rgba(24,119,255,.72);opacity:.55;animation:robotScan 4.8s ease-in-out infinite}
+.robotViewport canvas{position:relative;z-index:1;display:block;width:100%;height:100%}
 .robotSpeech{position:absolute;z-index:3;top:-10%;width:100%;padding:1rem 1.1rem;border:1px solid rgba(86,166,255,.72);border-radius:14px;background:rgba(2,8,20,.97);box-shadow:0 18px 48px rgba(0,0,0,.4),0 0 24px rgba(24,119,255,.16),inset 0 0 28px rgba(24,119,255,.08);backdrop-filter:blur(12px);color:#f4f1e9;transform-origin:bottom center}
 .robotNarrator[data-lado="direita"] .robotSpeech{right:0;transform-origin:bottom right}
 .robotNarrator[data-lado="esquerda"] .robotSpeech{left:0;transform-origin:bottom left}
@@ -635,7 +634,7 @@
   .headerCta span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 }
 
-@media(prefers-reduced-motion:reduce){.heroMouse i,.robotNarratorPlane:after{animation:none}.robotNarrator{display:none}}
+@media(prefers-reduced-motion:reduce){.heroMouse i,.robotViewport:after{animation:none}.robotNarrator{display:none}}
 
 /* Serviços — quatro frentes em módulos verticais, conforme a referência */
 .services{
