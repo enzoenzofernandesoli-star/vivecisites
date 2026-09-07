@@ -13,11 +13,21 @@ import { useHeroParallax } from "@/hooks/useHeroParallax";
 import { useDepthMotion } from "@/hooks/useDepthMotion";
 import { StickyHeader } from "./motion/StickyHeader";
 import { Cursor } from "./motion/Cursor";
+import { BarraProgresso } from "./motion/BarraProgresso";
 import { DistortionImage } from "./motion/DistortionImage";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import dynamic from "next/dynamic";
+import type { ControleEstrutura } from "./motion/Estrutura3D";
 import styles from "./viveci.module.css";
+
+// A estrutura carrega fora do bundle inicial e nunca no servidor: ela só
+// existe em desktop com ponteiro fino e movimento permitido.
+const Estrutura3D = dynamic(
+  () => import("./motion/Estrutura3D").then((m) => m.Estrutura3D),
+  { ssr: false }
+);
 
 const process = [
   {
@@ -329,6 +339,7 @@ export function ViveciRedesign() {
   const depthRoot = useRef<HTMLElement>(null);
   useDepthMotion(depthRoot);
   const intro = useRef<HTMLElement>(null);
+  const controleEstrutura = useRef<ControleEstrutura | null>(null);
   const projectsSection = useRef<HTMLElement>(null);
   const projectsViewport = useRef<HTMLDivElement>(null);
   const projectsTrack = useRef<HTMLDivElement>(null);
@@ -409,6 +420,58 @@ export function ViveciRedesign() {
     return () => cancelAnimationFrame(frame);
   }, [introPhase]);
 
+
+  /**
+   * Diretor de cena: o scroll não fala com a câmera. Ele avança uma timeline,
+   * e a mesma timeline move o DOM.
+   *
+   * A montagem começa junto com o desenho da marca, não depois dele: esperar
+   * a entrada do herói empurrava o fim da montagem para perto dos 8s, e a
+   * estrutura chegava pronta tarde demais para ser vista se montando.
+   */
+  useGSAP(() => {
+    const secao = intro.current;
+    if (!secao) return;
+
+    const mm = gsap.matchMedia();
+    mm.add(
+      "(min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+      () => {
+        const estado = { montagem: 0, camZ: 22 };
+        const empurrar = () => controleEstrutura.current?.montagem(estado.montagem);
+
+        const entrada = gsap.to(estado, {
+          montagem: 1,
+          duration: 3.4,
+          ease: "power2.inOut",
+          onUpdate: empurrar,
+          // o canvas monta por import dinâmico e pode não estar pronto no
+          // meio do caminho: reafirma o estado final quando ele chega
+          onComplete: empurrar,
+        });
+        const reforco = gsap.delayedCall(4.6, empurrar);
+
+        const recuo = gsap.to(estado, {
+          camZ: 54,
+          ease: "none",
+          scrollTrigger: { trigger: secao, start: "top top", end: "bottom top", scrub: 0.8 },
+          onUpdate: () => {
+            empurrar();
+            controleEstrutura.current?.camera(-4.2, 0.4, estado.camZ);
+          },
+        });
+
+        return () => {
+          entrada.kill();
+          reforco.kill();
+          recuo.scrollTrigger?.kill();
+          recuo.kill();
+        };
+      }
+    );
+
+    return () => mm.revert();
+  }, { dependencies: [] });
 
   /**
    * Desktop: o scroll da seção travada (sticky no CSS) vira posição do trilho.
@@ -562,6 +625,7 @@ export function ViveciRedesign() {
   };
 
   return <main ref={depthRoot} className={styles.site}>
+    <BarraProgresso />
     <StickyHeader />
     <Cursor />
     <section ref={intro} className={styles.intro} id="inicio">
@@ -616,6 +680,7 @@ export function ViveciRedesign() {
             <Image data-depth-plane src="/images/vvc-android-hero-blue.png" fill preload loading="eager" quality={100} sizes="100vw" alt="Android de acabamento preto e azul representando a tecnologia da Viveci" />
           </div>
           <div className={styles.heroShade} data-camada="fundo"/>
+          <Estrutura3D controle={controleEstrutura} />
           <div className={styles.heroCopy}>
             <TextReveal as="h1" modo="chars" start="top 95%" delay={0} duration={0.56} stagger={0.012} data-camada="titulo">VIVECI</TextReveal>
             <p className={styles.heroSub} data-camada="texto"><TextReveal as="strong" start="top 95%" delay={0.06} duration={0.62}>Sua visão. Nossa tecnologia.</TextReveal><span>Sites que elevam a sua marca.</span></p>
