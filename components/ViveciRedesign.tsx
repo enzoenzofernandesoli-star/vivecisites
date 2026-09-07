@@ -13,6 +13,7 @@ import { useHeroParallax } from "@/hooks/useHeroParallax";
 import { useDepthMotion } from "@/hooks/useDepthMotion";
 import { StickyHeader } from "./motion/StickyHeader";
 import { Cursor } from "./motion/Cursor";
+import { BarraProgresso } from "./motion/BarraProgresso";
 import { DistortionImage } from "./motion/DistortionImage";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { useGSAP } from "@gsap/react";
@@ -624,6 +625,7 @@ export function ViveciRedesign() {
   };
 
   return <main ref={depthRoot} className={styles.site}>
+    <BarraProgresso />
     <StickyHeader />
     <Cursor />
     <section ref={intro} className={styles.intro} id="inicio">
