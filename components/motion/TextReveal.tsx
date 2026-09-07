@@ -14,6 +14,7 @@ export function TextReveal({
   duration,
   stagger,
   modo,
+  plano,
   children,
   ...rest
 }: {
@@ -24,9 +25,11 @@ export function TextReveal({
   duration?: number;
   stagger?: number;
   modo?: "words" | "chars";
+  /** Entrada sem giro no eixo X: as palavras só sobem. */
+  plano?: boolean;
   children: React.ReactNode;
 } & React.HTMLAttributes<HTMLElement>) {
-  const ref = useTextReveal<HTMLElement>({ start, delay, duration, stagger, modo });
+  const ref = useTextReveal<HTMLElement>({ start, delay, duration, stagger, modo, plano });
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <Tag ref={ref as any} className={className} {...rest}>

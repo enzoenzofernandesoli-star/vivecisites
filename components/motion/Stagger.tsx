@@ -13,6 +13,7 @@ export function Stagger({
   className = "",
   intervalo = 0.06,
   deslocamento = 16,
+  plano = false,
   children,
   ...rest
 }: {
@@ -20,6 +21,8 @@ export function Stagger({
   className?: string;
   intervalo?: number;
   deslocamento?: number;
+  /** Entrada sem giro no eixo X: só sobe e aparece. */
+  plano?: boolean;
   children: React.ReactNode;
 } & React.HTMLAttributes<HTMLElement>) {
   const ref = useRef<HTMLElement>(null);
@@ -36,9 +39,9 @@ export function Stagger({
       gsap.from(filhos, {
         opacity: 0,
         y: deslocamento,
-        scale: .97,
-        rotationX: -9,
-        transformPerspective: 900,
+        scale: plano ? 1 : .97,
+        rotationX: plano ? 0 : -9,
+        transformPerspective: plano ? undefined : 900,
         transformOrigin: "50% 100%",
         duration: 0.72,
         ease: "power4.out",

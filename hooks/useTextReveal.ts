@@ -5,6 +5,8 @@ import { gsap, SplitText } from "@/lib/gsap";
 
 export function useTextReveal<T extends HTMLElement>(options?: {
   start?: string; stagger?: number; duration?: number; delay?: number; modo?: "words" | "chars";
+  /** Entrada sem giro no eixo X: as palavras só sobem. */
+  plano?: boolean;
 }) {
   const ref = useRef<T>(null);
   useGSAP(() => {
@@ -22,10 +24,10 @@ export function useTextReveal<T extends HTMLElement>(options?: {
           aria: "auto",
         });
         const targets = options?.modo === "chars" ? split.chars : split.words;
-        gsap.set(el, { transformPerspective: 900 });
+        if (!options?.plano) gsap.set(el, { transformPerspective: 900 });
         tween = gsap.from(targets, {
           yPercent: 112,
-          rotationX: -34,
+          rotationX: options?.plano ? 0 : -34,
           opacity: .08,
           transformOrigin: "50% 100%",
           duration: options?.duration ?? .78,

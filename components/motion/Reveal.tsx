@@ -12,6 +12,7 @@ import { gsap } from "@/lib/gsap";
 export function Reveal({
   as: Tag = "div",
   index = 0,
+  plano = false,
   className = "",
   children,
   ...rest
@@ -19,6 +20,8 @@ export function Reveal({
   as?: "div" | "article" | "li" | "section";
   index?: number;
   className?: string;
+  /** Entrada sem giro no eixo X: só sobe e aparece. */
+  plano?: boolean;
   children: React.ReactNode;
 } & React.HTMLAttributes<HTMLElement>) {
   const ref = useRef<HTMLElement>(null);
@@ -32,9 +35,9 @@ export function Reveal({
       gsap.from(el, {
         opacity: 0,
         y: 34,
-        scale: .985,
-        rotationX: 3,
-        transformPerspective: 1000,
+        scale: plano ? 1 : .985,
+        rotationX: plano ? 0 : 3,
+        transformPerspective: plano ? undefined : 1000,
         transformOrigin: "50% 100%",
         duration: 0.9,
         ease: "power4.out",
