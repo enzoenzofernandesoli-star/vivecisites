@@ -1161,3 +1161,78 @@
 @media(prefers-reduced-motion:reduce){
   .primaryButton:before,.secondaryButton>span:after{transition:none}
 }
+
+/* ================= Celular: paridade com o desktop =================
+   Quatro defeitos medidos em 390px que a versão de computador não tem:
+   alvo de toque abaixo de 44px, texto abaixo de 11px, vazio dentro do cartão
+   de serviço e o número da camada de tecnologia saindo pela borda. */
+@media(max-width:800px){
+
+  /* --- Alvos de toque ---
+     O mínimo declarado é 44px. Medidos antes: CTA do cabeçalho 119x32,
+     "Explorar projetos" 50x36, "Saiba mais" 74x16, setas do carrossel 30x30
+     e os pontos de progresso 7x7. */
+  .headerCta{display:inline-flex;min-height:44px;padding:0 8px 0 15px;align-items:center;gap:11px}
+  .headerCta b{display:grid;width:34px;height:34px;place-items:center}
+  .secondaryButton{min-height:44px;padding:0 6px}
+  .serviceLink{display:inline-flex;min-height:44px;align-items:center;gap:9px}
+  .servicesFooter a{min-height:50px;padding-top:0;padding-bottom:0;display:inline-flex;align-items:center;justify-content:center}
+  .projectMeta a{min-height:48px;padding-top:0;padding-bottom:0}
+  .projectsControls button{width:48px;height:48px;font-size:1.15rem}
+  /* O ponto continua pequeno no desenho; quem cresce é a área de toque. */
+  .projectsProgress>button{width:12px;height:12px}
+  .projectsProgress>button:after{content:"";position:absolute;inset:-15px -6px}
+  .processCta{min-height:50px;display:inline-flex;align-items:center;justify-content:center}
+
+  /* --- Texto legível ---
+     Rótulos de 6 e 7px são ilegíveis num celular. Sobem para 11px, e o
+     espaçamento entre letras encolhe na mesma medida para continuarem
+     cabendo na linha. */
+  .projectMeta>span{font-size:11px;letter-spacing:.16em;text-indent:.16em}
+  .projectMeta p{font-size:12px}
+  .stackLabel{font-size:11px;letter-spacing:.14em}
+  .servicesIntro>span,.processHeading>span,.technologyHeading>div>span,
+  .faqHeading>span,.projectsHead>span,.contactTitle>span{font-size:11px;letter-spacing:.2em;text-indent:.2em}
+  .technologyItem>span{font-size:12px}
+  .copyright{font-size:10px;letter-spacing:.1em}
+
+  /* --- Cartão de serviço ---
+     Tinha 390px de altura fixa com o conteúdo espalhado: o ícone no topo, o
+     título no meio e dois vãos enormes. Passa a ter a altura do conteúdo. */
+  /* O cartão é flex em coluna com gap grande: somado às margens dava mais de
+     45px entre cada linha, e o cartão inteiro tinha 390px de altura fixa. */
+  .site .serviceObjective{min-height:0;gap:0;padding:30px 22px 28px!important;justify-content:flex-start}
+  .serviceIcon{width:60px;height:60px;margin-bottom:22px}
+  .serviceObjective>h3{margin:0 0 14px}
+  .servicePurpose{margin-bottom:20px}
+
+  /* --- Número da camada de tecnologia ---
+     Ficava em left:-46px sobre uma pilha deslocada 26px: metade do círculo
+     caía fora da tela. */
+  .technologyStack{margin-left:54px}
+  .technologyLayer{padding-right:5vw}
+
+  /* Cabeçalho fixo e assinatura: eram 21 e 32px de altura. */
+  .stickyBrand{display:inline-flex;min-height:44px;align-items:center}
+  .stickyCta{display:inline-flex;min-height:44px;padding:0 16px;align-items:center}
+  .brand{min-height:44px}
+  .brand b{font-size:12px}
+  .headerCta span{font-size:11px}
+
+  /* Rodapé: os links tinham 10px de altura e 8px de corpo. */
+  .footerGrid{font-size:11px}
+  .footerGrid a{display:inline-flex;min-height:44px;align-items:center;font-size:12px}
+  .footerGrid p{font-size:11px;line-height:1.7}
+  .footerGrid>div>span{font-size:11px}
+  .copyright{font-size:11px}
+  .copyright a{display:inline-flex;min-height:44px;align-items:center;font-size:11px}
+
+  /* Últimos rótulos abaixo de 11px. */
+  .heroDisciplines,.heroDisciplines i{font-size:11px}
+  .site .projectsClosing{font-size:11px}
+  .technologyDeploy>span,.contactIntro>span,.contactSignature>span{font-size:11px}
+  .floatingWhatsapp span{font-size:11px}
+  .contact :global(.form-intro span),.contact :global(.form-submit p),
+  .contact :global(.contact-form label>span),
+  .contact :global(.contact-form small),.contactPanel p{font-size:11px}
+}
