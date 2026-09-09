@@ -821,13 +821,17 @@
   .processHeading h2{font-size:clamp(1.35rem,6vw,2.1rem);line-height:1.18;letter-spacing:0}
   .processHeading p{max-width:320px;margin:1rem auto 0;line-height:1.55}
   .processFlowItem{grid-template-columns:1fr;padding-top:34vw}
+  /* Ziguezague também no celular: o card ocupa 78% da largura e encosta ora
+     à esquerda, ora à direita, deixando os centros em 39% e 61%. */
   .processFlowItem[data-side="left"] .processFlowCard,.processFlowItem[data-side="right"] .processFlowCard{grid-column:1}
+  .processFlowItem[data-side="left"] .processFlowCard{margin:0 auto 0 0}
+  .processFlowItem[data-side="right"] .processFlowCard{margin:0 0 0 auto}
   /* uma coluna só: os dois cards ficam centralizados, então o traço liga
      centro a centro com uma ondulação leve — o traço largo entortava. */
   .processBolt{left:0;width:100%;height:34vw}
   .processBolt path[data-fluxo-curva="amplo"]{display:none}
   .processBolt path[data-fluxo-curva="estreito"]{display:block}
-  .processFlowCard{width:min(320px,88%)}
+  .processFlowCard{width:78%}
   .processFlowCard p{max-width:none}
   .site .processClosing{margin-top:8vw;font-size:16px}
   .processCta{width:100%;margin-top:6vw;justify-content:center}
