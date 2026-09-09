@@ -855,7 +855,10 @@
 .technologyHeading h2{margin:0;color:var(--ivory);font-family:var(--font-sans);font-size:clamp(1.8rem,2.95vw,3.6rem);font-weight:400;line-height:1.2;letter-spacing:.01em}
 .technologyHeading>p{max-width:340px;margin:0 0 .75rem;color:rgba(var(--light-rgb),.78);font-size:clamp(15px,1.25vw,18px);line-height:1.7}
 .stackLabel{display:block;max-width:1460px;margin:0 auto 1.15rem;color:rgba(var(--light-rgb),.82);font-size:8px;letter-spacing:.42em;text-transform:uppercase}
-.technologyStack{position:relative;max-width:1380px;margin:0 0 0 auto}
+/* Mesma largura e mesma centralização do cabeçalho, da etiqueta e da faixa
+   de deploy. Com max-width menor e margin-left automática, a pilha grudava na
+   direita: 155px fora do centro em 1920px e 436px em 2560px. */
+.technologyStack{position:relative;max-width:1460px;margin:0 auto}
 .technologyStack:before{content:"";position:absolute;z-index:0;left:52px;top:-34px;bottom:43px;width:1px;background:linear-gradient(180deg,transparent,var(--signal-bright) 7%,var(--signal-bright) 93%,transparent);box-shadow:0 0 12px rgba(var(--signal-rgb),.74)}
 /* O padding esquerdo abre a coluna onde vivem o trilho e o número: antes
    eles ficavam pendurados fora do bloco, invadindo a margem da seção. */
