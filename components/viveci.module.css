@@ -852,10 +852,12 @@
 .technologyHeading>p{max-width:340px;margin:0 0 .75rem;color:rgba(var(--light-rgb),.78);font-size:clamp(15px,1.25vw,18px);line-height:1.7}
 .stackLabel{display:block;max-width:1460px;margin:0 auto 1.15rem;color:rgba(var(--light-rgb),.82);font-size:8px;letter-spacing:.42em;text-transform:uppercase}
 .technologyStack{position:relative;max-width:1380px;margin:0 0 0 auto}
-.technologyStack:before{content:"";position:absolute;z-index:0;left:-55px;top:-34px;bottom:43px;width:1px;background:linear-gradient(180deg,transparent,var(--signal-bright) 7%,var(--signal-bright) 93%,transparent);box-shadow:0 0 12px rgba(var(--signal-rgb),.74)}
-.technologyLayer{position:relative;display:grid;min-height:145px;margin-bottom:22px;padding:28px 32px;grid-template-columns:minmax(230px,28%) 1fr;align-items:center;border:1px solid rgba(var(--steel-rgb),.32);border-radius:13px;background:linear-gradient(100deg,rgba(var(--atlantic-rgb),.24),rgba(var(--navy-rgb),.3));box-shadow:inset 0 1px 0 rgba(87,169,255,.09);transition:border-color .32s,background .32s,transform .32s}
+.technologyStack:before{content:"";position:absolute;z-index:0;left:52px;top:-34px;bottom:43px;width:1px;background:linear-gradient(180deg,transparent,var(--signal-bright) 7%,var(--signal-bright) 93%,transparent);box-shadow:0 0 12px rgba(var(--signal-rgb),.74)}
+/* O padding esquerdo abre a coluna onde vivem o trilho e o número: antes
+   eles ficavam pendurados fora do bloco, invadindo a margem da seção. */
+.technologyLayer{position:relative;display:grid;min-height:145px;margin-bottom:22px;padding:28px 32px 28px 104px;grid-template-columns:minmax(230px,28%) 1fr;align-items:center;border:1px solid rgba(var(--steel-rgb),.32);border-radius:13px;background:linear-gradient(100deg,rgba(var(--atlantic-rgb),.24),rgba(var(--navy-rgb),.3));box-shadow:inset 0 1px 0 rgba(87,169,255,.09);transition:border-color .32s,background .32s,transform .32s}
 .technologyLayer:hover{border-color:rgba(var(--signal-rgb),.58);background:linear-gradient(100deg,rgba(var(--signal-rgb),.07),rgba(var(--navy-rgb),.34));transform:translateX(4px)}
-.layerNumber{position:absolute;z-index:2;left:-82px;top:50%;display:grid;width:56px;height:56px;place-items:center;border:1px solid var(--signal-bright);border-radius:50%;background:#020713;color:var(--ivory);box-shadow:0 0 0 4px rgba(var(--signal-rgb),.07),0 0 22px rgba(var(--signal-rgb),.58);font-size:15px;font-weight:400}
+.layerNumber{position:absolute;z-index:2;left:24px;top:50%;display:grid;width:56px;height:56px;place-items:center;border:1px solid var(--signal-bright);border-radius:50%;background:#020713;color:var(--ivory);box-shadow:0 0 0 4px rgba(var(--signal-rgb),.07),0 0 22px rgba(var(--signal-rgb),.58);font-size:15px;font-weight:400}
 .layerCopy h3{margin:0;color:var(--ivory);font-family:var(--font-sans);font-size:clamp(1.55rem,2vw,2.35rem);font-weight:400;letter-spacing:-.025em}
 .layerCopy>i{display:block;width:24px;height:1px;margin:11px 0 12px;background:var(--signal-bright);box-shadow:0 0 8px rgba(var(--signal-rgb),.7)}
 .layerCopy p{max-width:260px;margin:0;color:rgba(var(--light-rgb),.72);font-size:clamp(13px,1.05vw,15px);line-height:1.55}
