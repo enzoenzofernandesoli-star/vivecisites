@@ -111,9 +111,11 @@ function ProcessFlowStep({
    * Antes a caixa ocupava só o miolo e a linha parava a 112px do ícone dos dois
    * lados: desenhava certo, mas não encostava em nada.
    *
-   * São duas versões do traço: a larga cruza entre as colunas do desktop, a
-   * estreita liga dois cards centralizados do mobile. O CSS mostra uma por vez
-   * e o orquestrador anima só a visível.
+   * São duas versões do traço, uma para cada largura, porque os cards ficam em
+   * posições diferentes: no desktop os centros caem em 25% e 75% da lista; no
+   * celular, onde o card ocupa 78% da largura e encosta ora à esquerda ora à
+   * direita, caem em 39% e 61%. O CSS mostra um traço por vez e o orquestrador
+   * anima só o visível.
    */
   const side = index % 2 === 0 ? "left" : "right";
   return (
@@ -128,7 +130,7 @@ function ProcessFlowStep({
           <path
             data-fluxo-curva="estreito"
             pathLength={1}
-            d={side === "right" ? "M 460 0 C 330 58, 590 122, 460 180" : "M 460 0 C 590 58, 330 122, 460 180"}
+            d={side === "right" ? "M 359 0 C 359 84, 561 96, 561 180" : "M 561 0 C 561 84, 359 96, 359 180"}
           />
         </svg>
       )}
